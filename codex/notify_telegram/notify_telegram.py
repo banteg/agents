@@ -1,25 +1,26 @@
 #!/usr/bin/env python3
 # /// script
-# requires-python = ">=3.10"
+# requires-python = ">=3.12"
 # dependencies = ["requests", "markdown-it-py", "sulguk>=0.11.1"]
 # ///
 import json
 import re
 import sys
+import tomllib
 from pathlib import Path
 
 import requests
 from markdown_it import MarkdownIt
 from sulguk import transform_html
 
-CREDS_PATH = Path.home() / ".codex" / "telegram.json"
+CREDS_PATH = Path.home() / ".codex" / "telegram.toml"
 ERR_PATH = Path.home() / ".codex" / "telegram_last_error.txt"
 
 
 def main() -> None:
-    creds = json.loads(CREDS_PATH.read_text(encoding="utf-8"))
+    creds = tomllib.loads(CREDS_PATH.read_text(encoding="utf-8"))
     bot_token = creds["bot_token"]
-    chat_id = str(creds["chat_id"])
+    chat_id = creds["chat_id"]
 
     event = json.loads(sys.argv[1])
 

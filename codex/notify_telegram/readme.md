@@ -6,15 +6,13 @@ Send Codex completion summaries to Telegram with safe Markdown rendering and sta
 
 1. Ensure `uv` is installed.
 2. Copy the script to `~/.codex/notify_telegram.py`.
-3. Create your [Telegram creds](https://t.me/botfather) file at `~/.codex/telegram.json`.
+3. Create your [Telegram creds](https://t.me/botfather) file at `~/.codex/telegram.toml`.
 
 Example:
 
-```json
-{
-  "bot_token": "123456:ABCDEF...",
-  "chat_id": "462722"
-}
+```toml
+bot_token = "123456:ABCDEF..."
+chat_id = 462722
 ```
 
 ## Configure
