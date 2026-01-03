@@ -4,13 +4,15 @@ bunny-approved agent workflows
 
 ## git worktrees
 
-ai agents really don't like files changing from under them as they carry out their carefully prepared plan. naturally, you want to isolate them, so they work in separate directories and don't touch each other's changes.
+ai agents don't like files changing under them as they carry out their plans. it helps to isolate them in separate directories so they don't touch each other's changes.
 
-git has a [`git worktree`](https://git-scm.com/docs/git-worktree) subcommand that allows checking out a branch into a separate directory. unfortunately, its ux is not very good, so most likely you will need a wrapper. i will list a few good ones that i use.
+the workflow i use: create a worktree, make some commits, then either discard it or open a pull request. for this i use `gh pr create` or just ask `claude`. once merged, discard the worktree and prune the branch.
 
-the workflow is to create a worktree, make some commits, then either discard it or create a pull request. for this i use `gh pr create` or simply ask `claude`. when it's merged, you can discard the worktree and the prune the merged branch.
+git has a [`git worktree`](https://git-scm.com/docs/git-worktree) subcommand for checking out a branch into a separate directory, but its ux isn't great. here are a couple of wrappers i use.
 
 ### [git wt](https://github.com/k1LoW/git-wt)
+
+a simple wrapper that handles the common cases well.
 
 ####  install
 
@@ -18,23 +20,29 @@ the workflow is to create a worktree, make some commits, then either discard it 
 
 #### config
 
-my preference is to put worktrees under `.worktrees` in the repo. don't forget to add it to `~/.gitignore_global`. then configue the path in the extension `git config wt.basedir .worktrees`
+i put worktrees under `.worktrees` in the repo. add this to `~/.gitignore_global`, then configure the path:
+
+```
+git config wt.basedir .worktrees
+```
 
 #### use
 
-`git wt` lists all worktrees
+`git wt` — list all worktrees
 
-`git wt feat/branch` switch to a worktree, creates the branch if needed
+`git wt feat/branch` — switch to a worktree, creating the branch if needed
 
-`git wt -d/D feat/branch` soft/hard delete a worktree along with the branch
+`git wt -d feat/branch` — soft delete worktree and branch
+
+`git wt -D feat/branch` — hard delete worktree and branch
 
 ### [worktrunk](https://worktrunk.dev/)
 
-if you want a more advanced tool, try this one. im considering switching to it as it almost exactly matches my workflow. it has some good features like automatically running install scripts or generating commits with [llm](https://llm.datasette.io/en/stable/) cli.
+a more full-featured option. it closely matches the create → pr → merge → cleanup cycle and has nice extras like auto-running install scripts or generating commits with [llm](https://llm.datasette.io/en/stable/) cli.
 
 #### config
 
-i put this into `~/.config/worktrunk/config.toml` to match my preferred naming structure.
+to match my naming structure, i put this in `~/.config/worktrunk/config.toml`:
 
 ```toml
 worktree-path = ".worktrees/{{ branch }}"
@@ -42,17 +50,14 @@ worktree-path = ".worktrees/{{ branch }}"
 
 #### use
 
-`wt switch -c -x codex feat/branch` switch to a worktree and run codex
-
-`wt merge` squash, rebase, merge into master, remove the worktree and the branch
-
-`wt step commit` commit your work based on the diff and previous commits style
-
-`wt remove` remove worktree and prune the branch
-
-`wt select` interactive switcher that shows all worktrees and the diff from master
-
+- `wt switch -c -x codex feat/branch` — switch to a worktree and run codex
+- `wt merge` — squash, rebase, merge into master, remove worktree and branch
+- `wt step commit` — commit based on the diff and previous commit style
+- `wt remove` — remove worktree and prune branch
+- `wt select` — interactive switcher showing all worktrees and diff from master
 
 ## notifications
 
-i use [this script](codex/notify_telegram/readme.md) to send codex notifications to telegram at the end of turn
+i created [takopi](https://github.com/youruser/takopi) to run agents from telegram when i'm away from the computer. it bridges codex, claude code, opencode, and pi. it streams progress, and supports resumable sessions so i can start a task on my phone and pick it up in the terminal later. install with `uv tool install takopi` and run it in your repo.
+
+i also use this codex `notify` [script](codex/notify_telegram/readme.md) to send a telegram message at the end of each turn.
