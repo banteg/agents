@@ -58,6 +58,6 @@ worktree-path = ".worktrees/{{ branch }}"
 
 ## notifications
 
-i created [takopi](https://github.com/youruser/takopi) to run agents from telegram when i'm away from the computer. it bridges codex, claude code, opencode, and pi. it streams progress, and supports resumable sessions so i can start a task on my phone and pick it up in the terminal later. install with `uv tool install takopi` and run it in your repo.
+i created [takopi](https://github.com/banteg/takopi) to run agents from telegram when i'm away from the computer. it bridges codex, claude code, opencode, and pi. it streams progress, and supports resumable sessions so i can start a task on my phone and pick it up in the terminal later. install with `uv tool install takopi` and run it in your repo.
 
 i also use this codex `notify` [script](codex/notify_telegram/readme.md) to send a telegram message at the end of each turn.
