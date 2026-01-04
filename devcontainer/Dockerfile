@@ -45,28 +45,22 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
   apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
-    wget \
     less \
     procps \
     sudo \
     zsh \
     fish \
-    man-db \
     unzip \
-    gnupg2 \
     openssh-client \
     gh \
     jq \
-    nano \
     vim \
     tmux \
     ncurses-term \
-    dnsutils \
     git \
     ripgrep \
     zoxide \
     fd-find \
-    python3 \
   && rm -rf /var/lib/apt/lists/*
 RUN if command -v fdfind >/dev/null 2>&1 && [ ! -e /usr/local/bin/fd ]; then \
     ln -s /usr/bin/fdfind /usr/local/bin/fd; \
@@ -152,6 +146,9 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
 # Ensure uv is on PATH for the node user.
 ENV PATH="/home/node/.local/bin:${PATH}"
+
+# Preinstall managed Python for uv.
+RUN uv python install 3.14
 
 # Passwordless sudo for the non-root user (for unattended / automation workflows).
 USER root
