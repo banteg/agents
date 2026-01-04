@@ -106,14 +106,6 @@ i created [takopi](https://github.com/banteg/takopi) to run agents from telegram
 
 i also use this codex `notify` [script](codex/notify_telegram/readme.md) to send a telegram message at the end of each turn.
 
-## plan and review
-
-for high-level planning or code review, upload your codebase to a frontier model. this beats tools like repomix or code2prompt — models handle zip and bundle files natively.
-
-`git archive master -o code.zip` — works with gpt pro, claude, and gemini
-
-`git bundle create code.bundle master` — includes commit history, works with gpt pro and claude
-
 ## uninstall beads (assuming you can)
 
 beads is often recommended, but removal requires [a 730-line shell script](https://gist.github.com/banteg/1a539b88b3c8945cd71e4b958f319d8d). it installs hooks in places you didn't know existed.
