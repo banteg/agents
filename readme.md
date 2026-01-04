@@ -62,11 +62,42 @@ running agents unattended (yolo mode) is best done in a devcontainer. it provide
 
 see the devcontainer template and usage notes in [devcontainer/readme.md](devcontainer/readme.md).
 
+## plan and review
+
+for architecture, refactors, debugging, or "tell me what to fix next" reviews, just give the model the repo.
+
+most people reach for repomix / code2prompt and feed the model a giant xml/md. that's outdated practice.
+
+upload a zip made directly by git:
+
+```sh
+git archive HEAD -o code.zip
+# if you need only part of the repo:
+git archive HEAD:src -o src.zip
+```
+
+this works with gpt pro, claude, and gemini.
+
+if you want context from commit messages, prior attempts, regressions, gpt and claude can also understand a git bundle:
+
+```sh
+git bundle create repo.bundle --all
+```
+
+
 ## notifications
 
 i created [takopi](https://github.com/banteg/takopi) to run agents from telegram when i'm away from the computer. it bridges codex, claude code, opencode, and pi. it streams progress, and supports resumable sessions so i can start a task on my phone and pick it up in the terminal later. install with `uv tool install takopi` and run it in your repo.
 
 i also use this codex `notify` [script](codex/notify_telegram/readme.md) to send a telegram message at the end of each turn.
+
+## plan and review
+
+for high-level planning or code review, upload your codebase to a frontier model. this beats tools like repomix or code2prompt — models handle zip and bundle files natively.
+
+`git archive master -o code.zip` — works with gpt pro, claude, and gemini
+
+`git bundle create code.bundle master` — includes commit history, works with gpt pro and claude
 
 ## uninstall beads (assuming you can)
 
