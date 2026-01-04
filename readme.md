@@ -65,5 +65,3 @@ i also use this codex `notify` [script](codex/notify_telegram/readme.md) to send
 ## uninstall beads (assuming you can)
 
 beads is often recommended, but removal requires [a 730-line shell script](https://gist.github.com/banteg/1a539b88b3c8945cd71e4b958f319d8d). it installs hooks in places you didn't know existed.
-
-a lightweight alternative to beads is called [dots](https://github.com/joelreymont/dots) (i haven't tried yet).
