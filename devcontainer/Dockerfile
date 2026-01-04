@@ -45,13 +45,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Ensure git worktrees use relative paths by default.
 RUN git config --system worktree.useRelativePaths true
 
-# Ensure default node user has access to the global npm prefix.
-RUN mkdir -p /usr/local/share/npm-global \
-  && chown -R node:node /usr/local/share
-
 RUN if ! id -u "$USERNAME" >/dev/null 2>&1; then \
     useradd -m -s /bin/zsh "$USERNAME"; \
   fi
+
+# Ensure default node user has access to the global npm prefix.
+RUN mkdir -p /usr/local/share/npm-global \
+  && chown -R "$USERNAME:$USERNAME" /usr/local/share
 
 # Persist bash history across container rebuilds.
 RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
