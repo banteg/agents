@@ -8,14 +8,11 @@ devcontainer helper for this template.
 usage:
   devc <repo>            install template, devcontainer up, then tmux
   devc install <repo>    install template only
-  devc up <repo>         devcontainer up
-  devc build <repo>      devcontainer build
   devc exec <repo> -- <cmd>
-  devc tmux <repo>       devcontainer exec tmux new -As agent
   devc self-install      install devc + template into ~/.local
 
 notes:
-  - install/up/build/tmux overwrite .devcontainer in the target repo
+  - install and default run overwrite .devcontainer in the target repo
   - if devcontainer cli is missing, we suggest how to install it
   - set DEVC_TEMPLATE_DIR to override the template source
 USAGE
@@ -137,7 +134,7 @@ case "$cmd" in
     self_install
     exit 0
     ;;
-  install|up|build|exec|tmux)
+  install|exec)
     ;;
   *)
     set -- "$cmd" "$@"
@@ -161,20 +158,10 @@ case "$cmd" in
     copy_template "$REPO_PATH" "$TEMPLATE_DIR"
     exit 0
     ;;
-  build)
-    copy_template "$REPO_PATH" "$TEMPLATE_DIR"
-    require_devcontainer_cli
-    devcontainer build --workspace-folder "$REPO_PATH"
-    ;;
   up)
     copy_template "$REPO_PATH" "$TEMPLATE_DIR"
     require_devcontainer_cli
     devcontainer up --workspace-folder "$REPO_PATH"
-    devcontainer exec --workspace-folder "$REPO_PATH" tmux new -As "${DEVC_TMUX_SESSION:-agent}"
-    ;;
-  tmux)
-    copy_template "$REPO_PATH" "$TEMPLATE_DIR"
-    require_devcontainer_cli
     devcontainer exec --workspace-folder "$REPO_PATH" tmux new -As "${DEVC_TMUX_SESSION:-agent}"
     ;;
   exec)

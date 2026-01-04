@@ -46,9 +46,8 @@ the helper expects the [devcontainer cli](https://github.com/devcontainers/cli).
 
 ```sh
 npm install -g @devcontainers/cli
-devc build .
 devc .
-devc tmux .
+devc exec . -- tmux new -As agent
 ```
 
 auth is persisted across rebuilds — `~/.codex/` and `~/.claude/` are mounted as docker volumes.
