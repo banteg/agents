@@ -3,20 +3,20 @@ set -euo pipefail
 
 usage() {
   cat <<'USAGE' >&2
-Install this repo's devcontainer template into a target repository.
+install this repo's devcontainer template into a target repository.
 
-Usage:
+usage:
   devcontainer/install.sh /path/to/repo
 
-This will copy:
+this will copy:
   - devcontainer/Dockerfile
   - devcontainer/devcontainer.json
   - devcontainer/post_install.sh
 
-Into:
+into:
   /path/to/repo/.devcontainer/
 
-CLI (optional):
+cli (optional):
   npm install -g @devcontainers/cli
   devcontainer up --workspace-folder /path/to/repo
 USAGE
@@ -47,7 +47,7 @@ for f in Dockerfile devcontainer.json post_install.sh; do
   cp -f "$SRC_DIR/$f" "$DEST_DIR/$f"
 done
 
-echo "✓ Devcontainer installed to: $DEST_DIR" >&2
-echo "  Next: open the repo in VS Code and run 'Reopen in Container'." >&2
-echo "  CLI: npm install -g @devcontainers/cli" >&2
+echo "✓ devcontainer installed to: $DEST_DIR" >&2
+echo "  next: open the repo in vscode and run 'reopen in container'." >&2
+echo "  cli: npm install -g @devcontainers/cli" >&2
 echo "       devcontainer up --workspace-folder $REPO_PATH" >&2
