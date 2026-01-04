@@ -96,7 +96,7 @@ RUN --mount=type=cache,target=/root/.npm \
   npm install -g \
     "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
     "@openai/codex@${CODEX_VERSION}" \
-  && corepack enable \
+  && corepack enable --install-directory /usr/local/share/npm-global/bin \
   && corepack prepare pnpm@latest --activate
 
 # Switch to non-root for normal dev.
