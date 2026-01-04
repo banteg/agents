@@ -69,7 +69,9 @@ RUN git config --system worktree.useRelativePaths true
 RUN if ! getent group "$USER_GID" >/dev/null 2>&1; then \
     groupadd -g "$USER_GID" "$USERNAME"; \
   fi \
-  && if ! id -u "$USERNAME" >/dev/null 2>&1; then \
+  && if id -u "$USERNAME" >/dev/null 2>&1; then \
+    usermod -u "$USER_UID" -g "$USER_GID" "$USERNAME"; \
+  else \
     useradd -m -s /bin/zsh -u "$USER_UID" -g "$USER_GID" "$USERNAME"; \
   fi
 
