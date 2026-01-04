@@ -7,6 +7,44 @@ import subprocess
 import sys
 from pathlib import Path
 
+FISH_CONFIG = """\
+# default fish config for the devcontainer
+function fish_greeting
+  echo "https://github.com/banteg/agents 2026-01-04"
+end
+
+function fish_prompt
+  set_color cyan
+  echo -n (prompt_pwd)
+  set_color normal
+  echo -n " > "
+end
+"""
+
+TMUX_CONFIG = """\
+set -g default-terminal "tmux-256color"
+set -g focus-events on
+set -sg escape-time 10
+set -g mouse on
+set -g history-limit 200000
+set -g renumber-windows on
+setw -g mode-keys vi
+
+# Keep new panes/windows in the same cwd
+bind c new-window -c "#{pane_current_path}"
+bind | split-window -h -c "#{pane_current_path}"
+bind - split-window -v -c "#{pane_current_path}"
+unbind '"'
+unbind %
+
+# Reload config
+bind r source-file ~/.tmux.conf \\; display-message "tmux.conf reloaded"
+
+# Terminal features
+set -as terminal-features ",xterm-ghostty:RGB"
+set -ga terminal-overrides '*:Ss=\\E[%p1%d q:Se=\\E[ q'
+"""
+
 
 def log(message: str) -> None:
     print(f"post-install: {message}", file=sys.stderr)
@@ -87,17 +125,35 @@ def ensure_claude_config() -> None:
     log(f"wrote default claude settings to {claude_config}")
 
 
-def install_tmux_config(workspace: Path) -> None:
-    tmux_src = workspace / ".devcontainer" / "tmux.conf"
-    if not tmux_src.exists():
+def ensure_fish_config() -> None:
+    fish_config_dir = Path(
+        os.environ.get(
+            "XDG_CONFIG_HOME",
+            str(Path.home() / ".config"),
+        )
+    ) / "fish"
+    fish_config_dir.mkdir(parents=True, exist_ok=True)
+    fish_config = fish_config_dir / "config.fish"
+    if fish_config.exists():
+        existing = fish_config.read_text(encoding="utf-8")
+        if existing.lstrip().startswith("# default fish config for the devcontainer"):
+            fish_config.write_text(FISH_CONFIG, encoding="utf-8")
+            log(f"updated default fish config at {fish_config}")
+            return
+        log(f"skipping fish config (already exists at {fish_config})")
         return
 
+    fish_config.write_text(FISH_CONFIG, encoding="utf-8")
+    log(f"wrote default fish config to {fish_config}")
+
+
+def install_tmux_config() -> None:
     tmux_dest = Path.home() / ".tmux.conf"
     if tmux_dest.exists():
         log(f"skipping tmux config (already exists at {tmux_dest})")
         return
 
-    tmux_dest.write_text(tmux_src.read_text(encoding="utf-8"), encoding="utf-8")
+    tmux_dest.write_text(TMUX_CONFIG, encoding="utf-8")
     log(f"installed tmux config to {tmux_dest}")
 
 
@@ -108,9 +164,10 @@ def main() -> None:
     else:
         log(f"skipping git config (no repo at {workspace})")
 
-    install_tmux_config(workspace)
+    install_tmux_config()
     ensure_codex_config()
     ensure_claude_config()
+    ensure_fish_config()
     log("configured defaults for container use")
 
 
