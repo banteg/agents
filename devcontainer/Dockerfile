@@ -110,7 +110,7 @@ if [ -d /commandhistory ]; then
     setopt APPEND_HISTORY INC_APPEND_HISTORY SHARE_HISTORY HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS
   fi
 fi
-EOF \
+EOF
   && echo '. /etc/profile.d/00-commandhistory.sh' >> /etc/bash.bashrc \
   && touch /etc/zsh/zshrc \
   && echo 'source /etc/profile.d/00-commandhistory.sh' >> /etc/zsh/zshrc
