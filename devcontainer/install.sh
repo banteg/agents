@@ -21,7 +21,7 @@ USAGE
 }
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-TEMPLATE_FILES=(.dockerignore Dockerfile devcontainer.json post_install.py tmux.conf)
+TEMPLATE_FILES=(.dockerignore Dockerfile devcontainer.json post_install.py)
 
 die() {
   echo "error: $*" >&2

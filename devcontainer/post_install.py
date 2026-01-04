@@ -64,6 +64,15 @@ def run_git(args: list[str], cwd: Path, check: bool = False) -> subprocess.Compl
     )
 
 
+def run_sudo(args: list[str]) -> subprocess.CompletedProcess[str]:
+    return subprocess.run(
+        ["sudo", *args],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+
+
 def resolve_workspace() -> Path:
     env_workspace = os.environ.get("WORKSPACE_FOLDER")
     if env_workspace:
@@ -152,6 +161,26 @@ def ensure_fish_config() -> None:
     log(f"wrote default fish config to {fish_config}")
 
 
+def ensure_dir_ownership(path: Path) -> None:
+    path.mkdir(parents=True, exist_ok=True)
+    try:
+        stat = path.stat()
+    except OSError as exc:
+        log(f"unable to stat {path}: {exc}")
+        return
+
+    uid = os.getuid()
+    gid = os.getgid()
+    if stat.st_uid == uid and stat.st_gid == gid:
+        return
+
+    result = run_sudo(["chown", "-R", f"{uid}:{gid}", str(path)])
+    if result.returncode != 0:
+        log(f"failed to chown {path}: {result.stderr.strip()}")
+        return
+    log(f"fixed ownership for {path}")
+
+
 def install_tmux_config() -> None:
     tmux_dest = Path.home() / ".tmux.conf"
     if tmux_dest.exists():
@@ -170,6 +199,10 @@ def main() -> None:
         log(f"skipping git config (no repo at {workspace})")
 
     install_tmux_config()
+    ensure_dir_ownership(Path("/commandhistory"))
+    ensure_dir_ownership(Path.home() / ".claude")
+    ensure_dir_ownership(Path.home() / ".codex")
+    ensure_dir_ownership(Path.home() / ".config" / "gh")
     ensure_codex_config()
     ensure_claude_config()
     ensure_fish_config()

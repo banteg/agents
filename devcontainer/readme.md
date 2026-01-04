@@ -33,6 +33,7 @@ build context defaults to `.devcontainer/`, so only the template files are sent 
 notes:
 - the gitconfig mount expects `~/.gitconfig` to exist on the host. if it doesn't, create it or remove the mount in `devcontainer.json`.
 - if you want your host gitignore to stay live, add a bind mount for it and update `post_install.py` to prefer that path.
+- tmux config is embedded in `post_install.py`; edit there if you want to change defaults.
 
 env knobs:
 - `DEVC_TEMPLATE_DIR` — template override
@@ -43,8 +44,9 @@ on container create, `.devcontainer/post_install.py`:
 
 - sets `worktree.useRelativePaths` in the repo so host + container worktrees stay compatible
 - sets `core.excludesfile` if `.devcontainer/.gitignore_global` exists
-- installs `.devcontainer/tmux.conf` as `~/.tmux.conf` if missing
+- installs a default `~/.tmux.conf` if missing
 - configures codex/claude defaults to skip permission prompts inside the container
+- writes a default fish config if missing
 
 ### vscode
 
