@@ -106,8 +106,9 @@ ENV PATH="${PATH}:/usr/local/share/npm-global/bin"
 
 # Install Claude Code + Codex CLI + pnpm.
 RUN --mount=type=cache,target=/root/.npm \
-  npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
-                 "@openai/codex@${CODEX_VERSION}" \
+  npm install -g \
+    "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
+    "@openai/codex@${CODEX_VERSION}" \
   && corepack enable \
   && corepack prepare pnpm@latest --activate
 
