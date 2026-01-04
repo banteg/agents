@@ -102,9 +102,9 @@ git bundle create repo.bundle --all
 
 ## notifications
 
-i created [takopi](https://github.com/banteg/takopi) to run agents from telegram when i'm away from the computer. it bridges codex, claude code, opencode, and pi. it streams progress, and supports resumable sessions so i can start a task on my phone and pick it up in the terminal later. install with `uv tool install takopi` and run it in your repo.
+for full telegram control of agents, use [takopi](https://github.com/banteg/takopi). it bridges codex, claude code, opencode, and pi, streams progress, and supports resumable sessions so you can start a task on your phone and pick it up in the terminal later. install with `uv tool install takopi` and run it in your repo.
 
-i also use this codex `notify` [script](codex/notify_telegram/readme.md) to send a telegram message at the end of each turn.
+for simple completion notifications, use this codex `notify` [script](codex/notify_telegram/readme.md) to send a telegram message at the end of each turn.
 
 ## uninstall beads (assuming you can)
 
