@@ -43,7 +43,6 @@ on container create, `.devcontainer/post_install.py`:
 - sets `core.excludesfile` if `.devcontainer/.gitignore_global` exists
 - installs `.devcontainer/tmux.conf` as `~/.tmux.conf` if missing
 - configures codex/claude defaults to skip permission prompts inside the container
-- removes a `TERM=xterm-256color` override from `~/.zshrc` if present
 
 ### vscode
 

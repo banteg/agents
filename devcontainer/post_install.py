@@ -101,20 +101,6 @@ def install_tmux_config(workspace: Path) -> None:
     log(f"installed tmux config to {tmux_dest}")
 
 
-def cleanup_zshrc() -> None:
-    zshrc = Path.home() / ".zshrc"
-    if not zshrc.exists():
-        return
-
-    lines = zshrc.read_text(encoding="utf-8").splitlines()
-    filtered = [line for line in lines if line != "export TERM=xterm-256color"]
-    if filtered == lines:
-        return
-
-    zshrc.write_text("\n".join(filtered) + "\n", encoding="utf-8")
-    log(f"removed TERM override from {zshrc}")
-
-
 def main() -> None:
     workspace = resolve_workspace()
     if is_git_repo(workspace):
@@ -125,7 +111,6 @@ def main() -> None:
     install_tmux_config(workspace)
     ensure_codex_config()
     ensure_claude_config()
-    cleanup_zshrc()
     log("configured defaults for container use")
 
 
