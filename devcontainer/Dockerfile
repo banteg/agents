@@ -1,8 +1,13 @@
+# syntax=docker/dockerfile:1.7
+
 # Based on Anthropic's Claude Code devcontainer template, with:
 # - Codex CLI installed
 # - Passwordless sudo for the non-root user
 # - NO firewall / network restrictions (internet enabled)
 # - tmux installed
+
+ARG NODE_IMAGE=node:22-bookworm-slim
+FROM ${NODE_IMAGE} AS node
 
 FROM ubuntu:25.10
 
@@ -16,7 +21,8 @@ ARG USERNAME=node
 
 # Install common dev tools.
 # Note: we intentionally do NOT install iptables/ipset or ship a firewall script.
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
+  apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
     wget \
@@ -36,11 +42,12 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ncurses-term \
     dnsutils \
     git \
-    nodejs \
-    npm \
     python3 \
-  && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
+
+# Bring in node + npm from the official node image (fast, no apt deps).
+COPY --from=node /usr/local/ /usr/local/
+RUN node -v && npm -v
 
 # Ensure git worktrees use relative paths by default.
 RUN git config --system worktree.useRelativePaths true
@@ -86,10 +93,18 @@ ENV SHELL=/bin/zsh
 ENV EDITOR=nano
 ENV VISUAL=nano
 
-# Install Claude Code + Codex CLI + pnpm
-RUN npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
-  && npm install -g "@openai/codex@${CODEX_VERSION}" \
-  && npm install -g pnpm
+# Make npm installs faster + more cache-friendly.
+ENV NPM_CONFIG_FUND=false \
+    NPM_CONFIG_AUDIT=false \
+    NPM_CONFIG_UPDATE_NOTIFIER=false \
+    NPM_CONFIG_PROGRESS=false
+
+# Install Claude Code + Codex CLI + pnpm.
+RUN --mount=type=cache,target=/home/node/.npm \
+  npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
+                 "@openai/codex@${CODEX_VERSION}" \
+  && corepack enable \
+  && corepack prepare pnpm@latest --activate
 
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
