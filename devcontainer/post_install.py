@@ -57,28 +57,6 @@ def configure_git(cwd: Path) -> None:
         log("set core.excludesfile to .devcontainer/.gitignore_global")
 
 
-def ensure_gitconfig_includes_host() -> None:
-    home = Path.home()
-    host = home / ".gitconfig_host"
-    if not host.exists():
-        return
-
-    target = home / ".gitconfig"
-    marker = "path = ~/.gitconfig_host"
-    snippet = "[include]\n\tpath = ~/.gitconfig_host\n"
-
-    if target.exists():
-        content = target.read_text(encoding="utf-8")
-        if marker in content:
-            log("skipping gitconfig include (already present)")
-            return
-        target.write_text(content.rstrip() + "\n\n" + snippet + "\n", encoding="utf-8")
-    else:
-        target.write_text(snippet + "\n", encoding="utf-8")
-
-    log("ensured ~/.gitconfig includes ~/.gitconfig_host")
-
-
 def ensure_codex_config() -> None:
     codex_dir = Path(os.environ.get("CODEX_HOME", str(Path.home() / ".codex")))
     codex_dir.mkdir(parents=True, exist_ok=True)
@@ -138,7 +116,6 @@ def cleanup_zshrc() -> None:
 
 def main() -> None:
     workspace = resolve_workspace()
-    ensure_gitconfig_includes_host()
     if is_git_repo(workspace):
         configure_git(workspace)
     else:
