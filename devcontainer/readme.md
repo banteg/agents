@@ -17,18 +17,9 @@ from this repo:
 devc path/to/repo
 ```
 
-`devc path/to/repo` installs the template, runs `devcontainer up`, and drops you into tmux.
-
-### install script (no self-install)
-
-```sh
-./devcontainer/install.sh path/to/repo
-```
-
-this behaves like `devc path/to/repo`: install, `devcontainer up`, then tmux.
-for install-only: `./devcontainer/install.sh install path/to/repo`.
-the script overwrites `.devcontainer/` and copies only the template files (not this readme).
+`devc path/to/repo` installs the template, runs `devcontainer up`, and drops you into tmux with claude and codex installed and configured with yolo defaults.
 if a global gitignore is configured on the host, it is copied to `.devcontainer/.gitignore_global`.
+the template includes `.dockerignore` to keep large or sensitive files out of the build context.
 
 ### post-install
 

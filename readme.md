@@ -66,9 +66,17 @@ new worktrees will use relative paths in all repos. to migrate existing worktree
 
 ## devcontainer
 
-running agents unattended (yolo mode) is best done in a devcontainer. it provides isolation and lets you skip permission prompts.
+running agents unattended (yolo mode) is best done in a devcontainer. it provides isolation and lets you skip permission prompts. you will need docker, i prefer [orbstack](https://orbstack.dev/) as a drop-in replacement.
 
-see the devcontainer template and usage notes in [devcontainer/readme.md](devcontainer/readme.md).
+here is something to get you started:
+
+```sh
+./devcontainer/install.sh self-install
+devc /path/to/repo
+# that's it, you are in tmux with claude and codex installed
+```
+
+see more usage notes [devcontainer/readme.md](devcontainer/readme.md).
 
 ## plan and review
 
