@@ -15,7 +15,7 @@ set -g __fish_git_prompt_showuntrackedfiles 0
 set -g __fish_git_prompt_showupstream none
 
 function fish_greeting
-  echo "https://github.com/banteg/agents 2026-01-04"
+  echo "banteg/agents · autonomous coding sandbox"
 end
 
 function fish_prompt
@@ -56,7 +56,9 @@ def log(message: str) -> None:
     print(f"post-install: {message}", file=sys.stderr)
 
 
-def run_git(args: list[str], cwd: Path, check: bool = False) -> subprocess.CompletedProcess[str]:
+def run_git(
+    args: list[str], cwd: Path, check: bool = False
+) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         ["git", "-C", str(cwd), *args],
         check=check,
@@ -111,7 +113,9 @@ def ensure_global_gitignore(workspace: Path) -> None:
 
     source = workspace / ".devcontainer" / ".gitignore_global"
     if not source.exists():
-        log(f"global core.excludesfile missing at {excludes_path} and no template copy found")
+        log(
+            f"global core.excludesfile missing at {excludes_path} and no template copy found"
+        )
         return
 
     excludes_path.parent.mkdir(parents=True, exist_ok=True)
@@ -128,8 +132,7 @@ def ensure_codex_config() -> None:
         return
 
     codex_config.write_text(
-        'approval_policy = "never"\n'
-        'sandbox_mode = "danger-full-access"\n',
+        'approval_policy = "never"\nsandbox_mode = "danger-full-access"\n',
         encoding="utf-8",
     )
     log(f"wrote default codex config to {codex_config}")
@@ -149,12 +152,15 @@ def ensure_claude_config() -> None:
 
 
 def ensure_fish_config() -> None:
-    fish_config_dir = Path(
-        os.environ.get(
-            "XDG_CONFIG_HOME",
-            str(Path.home() / ".config"),
+    fish_config_dir = (
+        Path(
+            os.environ.get(
+                "XDG_CONFIG_HOME",
+                str(Path.home() / ".config"),
+            )
         )
-    ) / "fish"
+        / "fish"
+    )
     fish_config_dir.mkdir(parents=True, exist_ok=True)
     fish_config = fish_config_dir / "config.fish"
     if fish_config.exists():
