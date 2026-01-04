@@ -56,6 +56,49 @@ worktree-path = ".worktrees/{{ branch }}"
 - `wt remove` — remove worktree and prune branch
 - `wt select` — interactive switcher showing all worktrees and diff from master
 
+## devcontainer
+
+running agents unattended (yolo mode) is best done in a devcontainer. it provides isolation and lets you skip the permission prompts that would otherwise require human approval.
+
+### vscode
+
+1. open your project in vscode
+
+2. copy the `.devcontainer` folder from [claude-code](https://github.com/anthropics/claude-code/tree/main/.devcontainer)
+
+3. in `devcontainer.json`, delete the `postCreateCommand` line to disable the firewall
+
+4. in `Dockerfile`, add this line for passwordless sudo:
+
+   ```dockerfile
+   RUN echo "node ALL=(root) NOPASSWD: ALL" > /etc/sudoers.d/yolo
+   ```
+
+5. click the blue connection button at the bottom left, choose "reopen in container"
+
+6. open terminal and run:
+
+   ```sh
+   claude --dangerously-skip-permissions
+   ```
+
+### cli
+
+you can also run devcontainers from the terminal using the [devcontainer cli](https://github.com/devcontainers/cli).
+
+```sh
+npm install -g @devcontainers/cli
+devcontainer up --workspace-folder .
+devcontainer exec --workspace-folder . tmux new -s agent
+# inside:
+claude --dangerously-skip-permissions
+codex --yolo
+# reattach with:
+devcontainer exec --workspace-folder . tmux attach -t agent
+```
+
+for multiple agents, run each in a separate tmux session or pane. combined with git worktrees, this lets you run parallel agents on different branches without conflicts.
+
 ## notifications
 
 i created [takopi](https://github.com/banteg/takopi) to run agents from telegram when i'm away from the computer. it bridges codex, claude code, opencode, and pi. it streams progress, and supports resumable sessions so i can start a task on my phone and pick it up in the terminal later. install with `uv tool install takopi` and run it in your repo.
