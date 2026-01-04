@@ -18,6 +18,8 @@ ARG CLAUDE_CODE_VERSION=latest
 ARG CODEX_VERSION=latest
 ARG GIT_DELTA_VERSION=0.18.2
 ARG USERNAME=node
+ARG USER_UID=1000
+ARG USER_GID=1000
 
 # Install common dev tools.
 # Note: we intentionally do NOT install iptables/ipset or ship a firewall script.
@@ -52,8 +54,11 @@ RUN node -v && npm -v
 # Ensure git worktrees use relative paths by default.
 RUN git config --system worktree.useRelativePaths true
 
-RUN if ! id -u "$USERNAME" >/dev/null 2>&1; then \
-    useradd -m -s /bin/zsh "$USERNAME"; \
+RUN if ! getent group "$USER_GID" >/dev/null 2>&1; then \
+    groupadd -g "$USER_GID" "$USERNAME"; \
+  fi \
+  && if ! id -u "$USERNAME" >/dev/null 2>&1; then \
+    useradd -m -s /bin/zsh -u "$USER_UID" -g "$USER_GID" "$USERNAME"; \
   fi
 
 # Ensure default node user has access to the global npm prefix.
@@ -97,10 +102,11 @@ ENV VISUAL=nano
 ENV NPM_CONFIG_FUND=false \
     NPM_CONFIG_AUDIT=false \
     NPM_CONFIG_UPDATE_NOTIFIER=false \
-    NPM_CONFIG_PROGRESS=false
+    NPM_CONFIG_PROGRESS=false \
+    NPM_CONFIG_CACHE=/home/node/.npm-cache
 
 # Install Claude Code + Codex CLI + pnpm.
-RUN --mount=type=cache,target=/home/node/.npm \
+RUN --mount=type=cache,target=/home/node/.npm-cache,uid=1000,gid=1000 \
   npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
                  "@openai/codex@${CODEX_VERSION}" \
   && corepack enable \
