@@ -1,82 +1,27 @@
-# devcontainer template
+# autonomous coding sandbox
 
 a devcontainer for running claude code and codex in yolo mode.
 
-based on anthropic's claude code devcontainer, modified to install codex and tmux, enable passwordless sudo, and remove firewall restrictions.
+based on anthropic's claude code devcontainer.
 
 ## requirements
 
-- docker (or orbstack)
+- docker (or [orbstack](https://orbstack.dev/))
 - devcontainer cli (`npm install -g @devcontainers/cli`)
 
-## use
+## quickstart
 
-copy the contents to `.devcontainer/` in your repo, or use the helper script.
+install `./devcontainer/install.sh self-install`
 
-### devc helper
+run `devc <repo>` or `devc .` inside project folder.
 
-from this repo:
+you're now in tmux with claude and codex ready to go, with permissions preconfigured.
 
-```sh
-./devcontainer/install.sh self-install
-devc path/to/repo  # ← you are in tmux with claude and codex
-```
+to use with vscode, run `devc install <repo>` and choose "reopen in container" in the editor.
+the built in terminal would login inside the container.
 
-`devc path/to/repo` installs the template, runs `devcontainer up`, and drops you into tmux with claude and codex installed and configured with yolo defaults.
-`devc rebuild path/to/repo` recreates the container to pick up template changes and keeps volumes intact.
-default shell is fish; zsh is installed for compatibility.
-**devc overwrites `.devcontainer/` on every run.** if you want to customize, fork the template and set `DEVC_TEMPLATE_DIR=/path/to/template`.
-if a global gitignore is configured on the host, it is copied to `.devcontainer/.gitignore_global`.
-build context defaults to `.devcontainer/`, so only the template files are sent to docker.
+## notes
 
-notes:
-- the gitconfig mount expects `~/.gitconfig` to exist on the host. if it doesn't, create it or remove the mount in `devcontainer.json`.
-- if you want your host gitignore to stay live, add a bind mount for it and update `post_install.py` to prefer that path.
-- tmux config is embedded in `post_install.py`; edit there if you want to change defaults.
-
-env knobs:
-- `DEVC_TEMPLATE_DIR` — template override
-
-### post-install
-
-on container create, `.devcontainer/post_install.py`:
-
-- enables relative worktrees via system git config in the image (no repo config changes)
-- ensures the configured global gitignore file exists (copied from `.devcontainer/.gitignore_global` if missing)
-- installs a default `~/.tmux.conf` if missing
-- configures codex/claude defaults to skip permission prompts inside the container
-- writes a default fish config if missing
-- persists fish history in `/commandhistory/.fish_history`
-
-### vscode
-
-open in vscode and run "reopen in container".
-
-```sh
-claude
-codex
-```
-
-### cli
-
-install the [devcontainer cli](https://github.com/devcontainers/cli):
-
-```sh
-npm install -g @devcontainers/cli
-```
-
-then:
-
-```sh
-devc .
-```
-
-auth is persisted across rebuilds — `~/.codex/` and `~/.claude/` are mounted as docker volumes.
-
-### reset state
-
-if you want to wipe persisted state:
-
-```sh
-docker volume rm commandhistory claude-code-config codex-config gh-config
-```
+- **overwrites `.devcontainer/`** on every run
+- default shell is fish, zsh available for agents
+- auth and history persist across rebuilds via docker volumes
