@@ -44,6 +44,8 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     ncurses-term \
     dnsutils \
     git \
+    ripgrep \
+    lazygit \
     python3 \
   && rm -rf /var/lib/apt/lists/*
 
