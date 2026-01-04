@@ -14,7 +14,7 @@ from this repo:
 
 ```sh
 ./devcontainer/install.sh self-install
-devc path/to/repo
+devc path/to/repo  # ← you are in tmux with claude and codex
 ```
 
 `devc path/to/repo` installs the template, runs `devcontainer up`, and drops you into tmux with claude and codex installed and configured with yolo defaults.

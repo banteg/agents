@@ -72,8 +72,7 @@ here is something to get you started:
 
 ```sh
 ./devcontainer/install.sh self-install
-devc /path/to/repo
-# that's it, you are in tmux with claude and codex installed
+devc /path/to/repo  # ← you are in tmux with claude and codex
 ```
 
 see more usage notes [devcontainer/readme.md](devcontainer/readme.md).
