@@ -13,8 +13,7 @@
     "vscode": {
       "extensions": [
         "anthropic.claude-code",
-        "dbaeumer.vscode-eslint",
-        "esbenp.prettier-vscode"
+        "openai.chatgpt"
       ],
       "settings": {
         "editor.formatOnSave": true,
