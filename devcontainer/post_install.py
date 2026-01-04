@@ -4,11 +4,12 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 
 def log(message: str) -> None:
-    print(f"post-install: {message}", file=os.sys.stderr)
+    print(f"post-install: {message}", file=sys.stderr)
 
 
 def run_git(args: list[str], cwd: Path, check: bool = False) -> subprocess.CompletedProcess[str]:
