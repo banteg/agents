@@ -52,7 +52,7 @@ def main() -> None:
 
     if not (r.status_code == 200 and data.get("ok") is True):
         ERR_PATH.write_text(
-            f"{r.status_code}\n{data.get('description','')}\n",
+            f"{r.status_code}\n{data.get('description', '')}\n",
             encoding="utf-8",
         )
 
