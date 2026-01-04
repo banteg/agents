@@ -5,6 +5,7 @@ import json
 import os
 import subprocess
 import sys
+import shutil
 from pathlib import Path
 
 FISH_CONFIG = """\
@@ -89,25 +90,33 @@ def is_git_repo(cwd: Path) -> bool:
     return result.returncode == 0 and result.stdout.strip() == "true"
 
 
-def configure_git(cwd: Path) -> None:
-    run_git(["config", "--local", "worktree.useRelativePaths", "true"], cwd, check=True)
-    log(f"enabled git worktree.useRelativePaths in {cwd}")
-
-    result = run_git(["config", "--local", "--get", "core.excludesfile"], cwd)
-    if result.returncode == 0 and result.stdout.strip():
-        log("skipping core.excludesfile (already set)")
+def ensure_global_gitignore(workspace: Path) -> None:
+    result = run_git(["config", "--global", "--path", "core.excludesfile"], workspace)
+    if result.returncode != 0:
+        log("no global core.excludesfile configured")
         return
 
-    home_ignore = Path.home() / ".gitignore_global"
-    if home_ignore.exists():
-        run_git(["config", "--local", "core.excludesfile", str(home_ignore)], cwd, check=True)
-        log("set core.excludesfile to ~/.gitignore_global")
+    raw_path = result.stdout.strip()
+    if not raw_path:
+        log("no global core.excludesfile configured")
         return
 
-    gitignore_global = cwd / ".devcontainer" / ".gitignore_global"
-    if gitignore_global.exists():
-        run_git(["config", "--local", "core.excludesfile", ".devcontainer/.gitignore_global"], cwd, check=True)
-        log("set core.excludesfile to .devcontainer/.gitignore_global")
+    excludes_path = Path(raw_path).expanduser()
+    if not excludes_path.is_absolute():
+        excludes_path = (Path.home() / excludes_path).resolve()
+
+    if excludes_path.exists():
+        log(f"global core.excludesfile exists at {excludes_path}")
+        return
+
+    source = workspace / ".devcontainer" / ".gitignore_global"
+    if not source.exists():
+        log(f"global core.excludesfile missing at {excludes_path} and no template copy found")
+        return
+
+    excludes_path.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(source, excludes_path)
+    log(f"copied gitignore to {excludes_path}")
 
 
 def ensure_codex_config() -> None:
@@ -193,16 +202,15 @@ def install_tmux_config() -> None:
 
 def main() -> None:
     workspace = resolve_workspace()
-    if is_git_repo(workspace):
-        configure_git(workspace)
-    else:
-        log(f"skipping git config (no repo at {workspace})")
+    if not is_git_repo(workspace):
+        log(f"skipping git repo checks (no repo at {workspace})")
 
     install_tmux_config()
     ensure_dir_ownership(Path("/commandhistory"))
     ensure_dir_ownership(Path.home() / ".claude")
     ensure_dir_ownership(Path.home() / ".codex")
     ensure_dir_ownership(Path.home() / ".config" / "gh")
+    ensure_global_gitignore(workspace)
     ensure_codex_config()
     ensure_claude_config()
     ensure_fish_config()

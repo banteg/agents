@@ -42,8 +42,8 @@ env knobs:
 
 on container create, `.devcontainer/post_install.py`:
 
-- sets `worktree.useRelativePaths` in the repo so host + container worktrees stay compatible
-- sets `core.excludesfile` if `.devcontainer/.gitignore_global` exists
+- enables relative worktrees via system git config in the image (no repo config changes)
+- ensures the configured global gitignore file exists (copied from `.devcontainer/.gitignore_global` if missing)
 - installs a default `~/.tmux.conf` if missing
 - configures codex/claude defaults to skip permission prompts inside the container
 - writes a default fish config if missing
