@@ -8,6 +8,16 @@ based on anthropic's claude code devcontainer, modified to install codex and tmu
 
 copy the contents to `.devcontainer/` in your repo.
 
+### install script
+
+from this repo:
+
+```sh
+./devcontainer/install.sh path/to/repo
+```
+
+or manually:
+
 ```sh
 cp -r devcontainer path/to/repo/.devcontainer
 ```
@@ -37,24 +47,3 @@ devcontainer exec --workspace-folder . tmux attach -t agent
 ```
 
 auth is persisted across rebuilds — `~/.codex/` and `~/.claude/` are mounted as docker volumes.
-
-## set yolo as default
-
-since the config directories persist, you can set yolo mode as the default so you don't need to pass flags every time.
-
-for claude code, add to `~/.claude/settings.json`:
-
-```json
-{
-  "permissions": {
-    "defaultMode": "bypassPermissions"
-  }
-}
-```
-
-for codex, add to `~/.codex/config.toml`:
-
-```toml
-approval_policy = "never"
-sandbox_mode = "danger-full-access"
-```

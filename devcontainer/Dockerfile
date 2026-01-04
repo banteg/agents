@@ -11,23 +11,34 @@ ENV TZ="${TZ}"
 
 ARG CLAUDE_CODE_VERSION=latest
 ARG CODEX_VERSION=latest
+ARG GIT_VERSION=2.48.0
 ARG GIT_DELTA_VERSION=0.18.2
 ARG ZSH_IN_DOCKER_VERSION=1.2.0
 
 # Install common dev tools.
 # Note: we intentionally do NOT install iptables/ipset or ship a firewall script.
+#
+# Git >= 2.48 is required for worktree.useRelativePaths (relative worktrees).
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
     wget \
     less \
-    git \
+    build-essential \
+    gettext \
+    libcurl4-gnutls-dev \
+    libexpat1-dev \
+    libpcre2-dev \
+    libssl-dev \
+    zlib1g-dev \
+    perl \
     procps \
     sudo \
     fzf \
     zsh \
     man-db \
     unzip \
+    xz-utils \
     gnupg2 \
     openssh-client \
     gh \
@@ -38,6 +49,17 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     dnsutils \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
+
+# Install a modern Git (>= 2.48) so relative worktrees work inside devcontainers.
+# Debian's stock Git can lag behind; building from source keeps this template portable.
+RUN set -eux; \
+  curl -fsSL "https://www.kernel.org/pub/software/scm/git/git-${GIT_VERSION}.tar.xz" -o /tmp/git.tar.xz; \
+  tar -xJf /tmp/git.tar.xz -C /tmp; \
+  make -C "/tmp/git-${GIT_VERSION}" prefix=/usr/local NO_TCLTK=YesPlease USE_LIBPCRE2=YesPlease all; \
+  make -C "/tmp/git-${GIT_VERSION}" prefix=/usr/local NO_TCLTK=YesPlease USE_LIBPCRE2=YesPlease install; \
+  rm -rf /tmp/git.tar.xz "/tmp/git-${GIT_VERSION}"; \
+  git --version; \
+  git config --system worktree.useRelativePaths true
 
 # Ensure default node user has access to the global npm prefix.
 RUN mkdir -p /usr/local/share/npm-global \
