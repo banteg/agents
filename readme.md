@@ -28,13 +28,10 @@ git config wt.basedir .worktrees
 
 #### use
 
-`git wt` — list all worktrees
-
-`git wt feat/branch` — switch to a worktree, creating the branch if needed
-
-`git wt -d feat/branch` — soft delete worktree and branch
-
-`git wt -D feat/branch` — hard delete worktree and branch
+- `git wt` — list all worktrees
+- `git wt feat/branch` — switch to a worktree, creating the branch if needed
+- `git wt -d feat/branch` — soft delete worktree and branch
+- `git wt -D feat/branch` — hard delete worktree and branch
 
 ### [worktrunk](https://worktrunk.dev/)
 
@@ -56,7 +53,7 @@ worktree-path = ".worktrees/{{ branch }}"
 - `wt remove` — remove worktree and prune branch
 - `wt select` — interactive switcher showing all worktrees and diff from master
 
-###  relative worktrees
+### relative worktrees
 
 by default, git stores absolute paths in worktree metadata. this breaks if you use devcontainer. git 2.48+ added relative path support.
 
@@ -68,20 +65,14 @@ new worktrees will use relative paths in all repos. to migrate existing worktree
 
 running agents unattended (yolo mode) is best done in a devcontainer. it provides isolation and lets you skip permission prompts. you will need docker, i prefer [orbstack](https://orbstack.dev/) as a drop-in replacement.
 
-prereqs:
-- docker engine (or orbstack)
-- devcontainer cli (`npm install -g @devcontainers/cli`)
-
-quickstart:
+i made a handy devcontainer script:
 
 ```sh
 ./devcontainer/install.sh self-install
 devc /path/to/repo  # ← you are in tmux with claude and codex
 ```
 
-auth: you will log in once for `claude` / `codex`; credentials persist in volumes.
-
-see more usage notes [devcontainer/readme.md](devcontainer/readme.md).
+read more [devcontainer/readme.md](devcontainer/readme.md).
 
 ## plan and review
 
@@ -104,7 +95,6 @@ if you want context from commit messages, prior attempts, regressions, gpt and c
 ```sh
 git bundle create repo.bundle --all
 ```
-
 
 ## notifications
 
