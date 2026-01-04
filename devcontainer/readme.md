@@ -29,6 +29,7 @@ the install script copies only the devcontainer files (not this readme).
 on container create, `.devcontainer/post_install.sh`:
 
 - sets `worktree.useRelativePaths` in the repo so host + container worktrees stay compatible
+- sets `core.excludesfile` if `.devcontainer/.gitignore_global` exists
 - configures codex/claude defaults to skip permission prompts inside the container
 
 ### vscode

@@ -13,6 +13,16 @@ fi
 if git -C "$workspace_dir" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   git -C "$workspace_dir" config --local worktree.useRelativePaths true
   log "enabled git worktree.useRelativePaths in $workspace_dir"
+
+  gitignore_global="$workspace_dir/.devcontainer/.gitignore_global"
+  if [[ -f "$gitignore_global" ]]; then
+    if git -C "$workspace_dir" config --local --get core.excludesfile >/dev/null 2>&1; then
+      log "skipping core.excludesfile (already set)"
+    else
+      git -C "$workspace_dir" config --local core.excludesfile ".devcontainer/.gitignore_global"
+      log "set core.excludesfile to .devcontainer/.gitignore_global"
+    fi
+  fi
 else
   log "skipping git config (no repo at $workspace_dir)"
 fi
