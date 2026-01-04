@@ -18,8 +18,6 @@ ARG CLAUDE_CODE_VERSION=latest
 ARG CODEX_VERSION=latest
 ARG GIT_DELTA_VERSION=0.18.2
 ARG USERNAME=node
-ARG USER_UID=1000
-ARG USER_GID=1000
 
 # Install common dev tools.
 # Note: we intentionally do NOT install iptables/ipset or ship a firewall script.
@@ -66,13 +64,8 @@ RUN node -v && npm -v
 # Ensure git worktrees use relative paths by default.
 RUN git config --system worktree.useRelativePaths true
 
-RUN if ! getent group "$USER_GID" >/dev/null 2>&1; then \
-    groupadd -g "$USER_GID" "$USERNAME"; \
-  fi \
-  && if id -u "$USERNAME" >/dev/null 2>&1; then \
-    usermod -u "$USER_UID" -g "$USER_GID" "$USERNAME"; \
-  else \
-    useradd -m -s /bin/zsh -u "$USER_UID" -g "$USER_GID" "$USERNAME"; \
+RUN if ! id -u "$USERNAME" >/dev/null 2>&1; then \
+    useradd -m -s /bin/zsh "$USERNAME"; \
   fi
 
 # Ensure default node user has access to the global npm prefix.
@@ -100,31 +93,31 @@ RUN ARCH="$(dpkg --print-architecture)" \
   && dpkg -i "git-delta_${GIT_DELTA_VERSION}_${ARCH}.deb" \
   && rm "git-delta_${GIT_DELTA_VERSION}_${ARCH}.deb"
 
-# Switch to non-root for normal dev + npm global installs.
-USER node
-
-# Install global packages.
-ENV NPM_CONFIG_PREFIX=/usr/local/share/npm-global
-ENV PATH="${PATH}:/usr/local/share/npm-global/bin"
-
-# Default shell + editor.
-ENV SHELL=/bin/zsh
-ENV EDITOR=nano
-ENV VISUAL=nano
-
 # Make npm installs faster + more cache-friendly.
 ENV NPM_CONFIG_FUND=false \
     NPM_CONFIG_AUDIT=false \
     NPM_CONFIG_UPDATE_NOTIFIER=false \
     NPM_CONFIG_PROGRESS=false \
-    NPM_CONFIG_CACHE=/home/node/.npm-cache
+    NPM_CONFIG_CACHE=/root/.npm
+
+# Install global packages.
+ENV NPM_CONFIG_PREFIX=/usr/local/share/npm-global
+ENV PATH="${PATH}:/usr/local/share/npm-global/bin"
 
 # Install Claude Code + Codex CLI + pnpm.
-RUN --mount=type=cache,target=/home/node/.npm-cache,uid=1000,gid=1000 \
+RUN --mount=type=cache,target=/root/.npm \
   npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
                  "@openai/codex@${CODEX_VERSION}" \
   && corepack enable \
   && corepack prepare pnpm@latest --activate
+
+# Switch to non-root for normal dev.
+USER node
+
+# Default shell + editor.
+ENV SHELL=/bin/zsh
+ENV EDITOR=nano
+ENV VISUAL=nano
 
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
