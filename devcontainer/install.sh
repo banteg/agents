@@ -162,7 +162,7 @@ case "$cmd" in
     copy_template "$REPO_PATH" "$TEMPLATE_DIR"
     require_devcontainer_cli
     devcontainer up --workspace-folder "$REPO_PATH"
-    devcontainer exec --workspace-folder "$REPO_PATH" tmux new -As "${DEVC_TMUX_SESSION:-agent}"
+    devcontainer exec --workspace-folder "$REPO_PATH" tmux new -As agent
     ;;
   exec)
     copy_template "$REPO_PATH" "$TEMPLATE_DIR"

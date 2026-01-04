@@ -34,7 +34,6 @@ notes:
 
 env knobs:
 - `DEVC_TEMPLATE_DIR` — template override
-- `DEVC_TMUX_SESSION` — tmux session name (default: `agent`)
 
 ### post-install
 

@@ -51,7 +51,7 @@ worktree-path = ".worktrees/{{ branch }}"
 #### use
 
 - `wt switch -c -x codex feat/branch` — switch to a worktree and run codex
-- `wt merge` — squash, rebase, merge into default branch, remove worktree and branch
+- `wt merge` — squash, rebase, merge into master, remove worktree and branch
 - `wt step commit` — commit based on the diff and previous commit style
 - `wt remove` — remove worktree and prune branch
 - `wt select` — interactive switcher showing all worktrees and diff from master
