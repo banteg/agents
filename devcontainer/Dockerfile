@@ -120,9 +120,24 @@ RUN echo '. /etc/profile.d/00-commandhistory.sh' >> /etc/bash.bashrc \
 ENV DEVCONTAINER=true
 
 # Create workspace + agent config dirs and set permissions.
-RUN mkdir -p /workspace /home/node/.claude /home/node/.codex /home/node/.npm \
+RUN mkdir -p /workspace /home/node/.claude /home/node/.codex /home/node/.npm /home/node/.config/fish \
   && touch /home/node/.zshrc \
-  && chown -R node:node /workspace /home/node/.claude /home/node/.codex /home/node/.npm /home/node/.zshrc
+  && cat >/home/node/.config/fish/config.fish <<'EOF'
+# default fish config for the devcontainer
+function fish_greeting
+  set -l repo "https://github.com/banteg/agents"
+  set -l version (date "+%Y-%m-%d")
+  echo "$repo $version"
+end
+
+function fish_prompt
+  set_color cyan
+  echo -n (prompt_pwd)
+  set_color normal
+  echo -n " > "
+end
+EOF
+  && chown -R node:node /workspace /home/node/.claude /home/node/.codex /home/node/.npm /home/node/.config /home/node/.zshrc
 
 WORKDIR /workspace
 
@@ -141,6 +156,8 @@ USER node
 ENV NPM_CONFIG_CACHE=/home/node/.npm
 
 # Default shell + editor.
+ENV HOME=/home/node
+ENV XDG_CONFIG_HOME=/home/node/.config
 ENV SHELL=/usr/bin/fish
 ENV EDITOR=nano
 ENV VISUAL=nano
