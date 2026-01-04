@@ -40,7 +40,7 @@
     }
   },
   "remoteUser": "node",
-  "postCreateCommand": "uv run /workspace/.devcontainer/post_install.py",
+  "postCreateCommand": "uv run --no-sync /workspace/.devcontainer/post_install.py",
   "mounts": [
     "source=commandhistory,target=/commandhistory,type=volume",
     "source=claude-code-config,target=/home/node/.claude,type=volume",
