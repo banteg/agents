@@ -22,7 +22,7 @@ if a global gitignore is configured on this host, it will be copied to:
 cli (optional):
   npm install -g @devcontainers/cli
   devcontainer up --workspace-folder /path/to/repo
-  devcontainer exec --workspace-folder /path/to/repo bash
+  devcontainer exec --workspace-folder /path/to/repo tmux new -s agent
 USAGE
 }
 
@@ -75,4 +75,4 @@ echo "✓ devcontainer installed to: $DEST_DIR" >&2
 echo "  next: open the repo in vscode and run 'reopen in container'." >&2
 echo "  cli: npm install -g @devcontainers/cli" >&2
 echo "       devcontainer up --workspace-folder $REPO_PATH" >&2
-echo "       devcontainer exec --workspace-folder $REPO_PATH bash" >&2
+echo "       devcontainer exec --workspace-folder $REPO_PATH tmux new -s agent" >&2
