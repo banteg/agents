@@ -22,6 +22,8 @@ or manually:
 cp -r devcontainer path/to/repo/.devcontainer
 ```
 
+the install script copies only the devcontainer files (not this readme).
+
 ### post-install
 
 on container create, `.devcontainer/post_install.sh`:

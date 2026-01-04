@@ -12,7 +12,6 @@ This will copy:
   - devcontainer/Dockerfile
   - devcontainer/devcontainer.json
   - devcontainer/post_install.sh
-  - devcontainer/readme.md
 
 Into:
   /path/to/repo/.devcontainer/
@@ -36,7 +35,7 @@ DEST_DIR="$REPO_PATH/.devcontainer"
 
 mkdir -p "$DEST_DIR"
 
-for f in Dockerfile devcontainer.json post_install.sh readme.md; do
+for f in Dockerfile devcontainer.json post_install.sh; do
   if [[ ! -f "$SRC_DIR/$f" ]]; then
     echo "error: missing template file: $SRC_DIR/$f" >&2
     exit 1
