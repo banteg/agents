@@ -6,7 +6,6 @@
       "TZ": "${localEnv:TZ}",
       "CLAUDE_CODE_VERSION": "latest",
       "CODEX_VERSION": "latest",
-      "GIT_VERSION": "2.48.0",
       "GIT_DELTA_VERSION": "0.18.2",
       "ZSH_IN_DOCKER_VERSION": "1.2.0"
     }
