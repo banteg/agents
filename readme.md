@@ -68,12 +68,18 @@ new worktrees will use relative paths in all repos. to migrate existing worktree
 
 running agents unattended (yolo mode) is best done in a devcontainer. it provides isolation and lets you skip permission prompts. you will need docker, i prefer [orbstack](https://orbstack.dev/) as a drop-in replacement.
 
-here is something to get you started:
+prereqs:
+- docker engine (or orbstack)
+- devcontainer cli (`npm install -g @devcontainers/cli`)
+
+quickstart:
 
 ```sh
 ./devcontainer/install.sh self-install
 devc /path/to/repo  # ← you are in tmux with claude and codex
 ```
+
+auth: you will log in once for `claude` / `codex`; credentials persist in volumes.
 
 see more usage notes [devcontainer/readme.md](devcontainer/readme.md).
 
