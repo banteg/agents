@@ -111,7 +111,8 @@ if [ -d /commandhistory ]; then
   fi
 fi
 EOF
-  && echo '. /etc/profile.d/00-commandhistory.sh' >> /etc/bash.bashrc \
+
+RUN echo '. /etc/profile.d/00-commandhistory.sh' >> /etc/bash.bashrc \
   && touch /etc/zsh/zshrc \
   && echo 'source /etc/profile.d/00-commandhistory.sh' >> /etc/zsh/zshrc
 
