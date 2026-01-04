@@ -15,6 +15,10 @@ This will copy:
 
 Into:
   /path/to/repo/.devcontainer/
+
+CLI (optional):
+  npm install -g @devcontainers/cli
+  devcontainer up --workspace-folder /path/to/repo
 USAGE
 }
 
@@ -45,3 +49,5 @@ done
 
 echo "✓ Devcontainer installed to: $DEST_DIR" >&2
 echo "  Next: open the repo in VS Code and run 'Reopen in Container'." >&2
+echo "  CLI: npm install -g @devcontainers/cli" >&2
+echo "       devcontainer up --workspace-folder $REPO_PATH" >&2
