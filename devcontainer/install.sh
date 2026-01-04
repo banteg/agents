@@ -3,78 +3,187 @@ set -euo pipefail
 
 usage() {
   cat <<'USAGE' >&2
-install this repo's devcontainer template into a target repository.
+devcontainer helper for this template.
 
 usage:
-  devcontainer/install.sh /path/to/repo
+  devc <repo>            install template, devcontainer up, then tmux
+  devc install <repo>    install template only
+  devc up <repo>         devcontainer up
+  devc build <repo>      devcontainer build
+  devc exec <repo> -- <cmd>
+  devc tmux <repo>       devcontainer exec tmux new -As agent
+  devc self-install      install devc + template into ~/.local
 
-this will copy:
-  - devcontainer/.dockerignore
-  - devcontainer/Dockerfile
-  - devcontainer/devcontainer.json
-  - devcontainer/post_install.py
-  - devcontainer/tmux.conf
-
-into:
-  /path/to/repo/.devcontainer/
-
-if a global gitignore is configured on this host, it will be copied to:
-  /path/to/repo/.devcontainer/.gitignore_global
-
-cli (optional):
-  npm install -g @devcontainers/cli
-  devcontainer build --workspace-folder /path/to/repo
-  devcontainer exec --workspace-folder /path/to/repo tmux new -s agent
+notes:
+  - install/up/build/tmux overwrite .devcontainer in the target repo
+  - if devcontainer cli is missing, we suggest how to install it
+  - set DEVC_TEMPLATE_DIR to override the template source
 USAGE
 }
 
-if [[ $# -ne 1 ]]; then
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+TEMPLATE_FILES=(.dockerignore Dockerfile devcontainer.json post_install.py tmux.conf)
+
+die() {
+  echo "error: $*" >&2
+  exit 1
+}
+
+ensure_repo() {
+  local repo_path="$1"
+  [[ -d "$repo_path" ]] || die "repo path does not exist or is not a directory: $repo_path"
+}
+
+find_template_dir() {
+  if [[ -n "${DEVC_TEMPLATE_DIR:-}" && -d "$DEVC_TEMPLATE_DIR" ]]; then
+    echo "$DEVC_TEMPLATE_DIR"
+    return
+  fi
+
+  if [[ -f "$SCRIPT_DIR/Dockerfile" && -f "$SCRIPT_DIR/devcontainer.json" ]]; then
+    echo "$SCRIPT_DIR"
+    return
+  fi
+
+  if [[ -d "$HOME/.local/share/devc/template" ]]; then
+    echo "$HOME/.local/share/devc/template"
+    return
+  fi
+
+  die "template dir not found (set DEVC_TEMPLATE_DIR or run devc self-install)"
+}
+
+copy_template() {
+  local repo_path="$1"
+  local src_dir="$2"
+  local dest_dir="$repo_path/.devcontainer"
+
+  mkdir -p "$dest_dir"
+
+  for f in "${TEMPLATE_FILES[@]}"; do
+    [[ -f "$src_dir/$f" ]] || die "missing template file: $src_dir/$f"
+    cp -f "$src_dir/$f" "$dest_dir/$f"
+  done
+
+  local global_ignore=""
+  if command -v git >/dev/null 2>&1; then
+    global_ignore="$(git config --global --path core.excludesfile 2>/dev/null || true)"
+  fi
+
+  if [[ -z "$global_ignore" ]]; then
+    if [[ -n "${XDG_CONFIG_HOME:-}" && -f "$XDG_CONFIG_HOME/git/ignore" ]]; then
+      global_ignore="$XDG_CONFIG_HOME/git/ignore"
+    elif [[ -f "$HOME/.config/git/ignore" ]]; then
+      global_ignore="$HOME/.config/git/ignore"
+    elif [[ -f "$HOME/.gitignore_global" ]]; then
+      global_ignore="$HOME/.gitignore_global"
+    fi
+  fi
+
+  if [[ -n "$global_ignore" && -f "$global_ignore" ]]; then
+    cp -f "$global_ignore" "$dest_dir/.gitignore_global"
+    echo "  copied global gitignore from $global_ignore" >&2
+  fi
+
+  echo "✓ devcontainer installed to: $dest_dir" >&2
+}
+
+require_devcontainer_cli() {
+  if ! command -v devcontainer >/dev/null 2>&1; then
+    echo "error: devcontainer cli not found" >&2
+    echo "hint: npm install -g @devcontainers/cli" >&2
+    exit 1
+  fi
+}
+
+self_install() {
+  local bin_dir="$HOME/.local/bin"
+  local share_dir="$HOME/.local/share/devc/template"
+  local template_src
+
+  template_src="$(find_template_dir)"
+
+  mkdir -p "$bin_dir" "$share_dir"
+
+  cp -f "$SCRIPT_DIR/$(basename -- "$0")" "$bin_dir/devc"
+  chmod +x "$bin_dir/devc"
+
+  rm -rf "$share_dir"
+  mkdir -p "$share_dir"
+  for f in "${TEMPLATE_FILES[@]}"; do
+    [[ -f "$template_src/$f" ]] || die "missing template file: $template_src/$f"
+    cp -f "$template_src/$f" "$share_dir/$f"
+  done
+
+  echo "✓ installed devc to $bin_dir/devc" >&2
+  echo "✓ installed template to $share_dir" >&2
+  echo "note: ensure $bin_dir is on your PATH" >&2
+}
+
+if [[ $# -lt 1 ]]; then
+  usage
+  exit 1
+fi
+
+cmd="$1"
+shift
+
+case "$cmd" in
+  help|-h|--help)
+    usage
+    exit 0
+    ;;
+  self-install)
+    self_install
+    exit 0
+    ;;
+  install|up|build|exec|tmux)
+    ;;
+  *)
+    set -- "$cmd" "$@"
+    cmd="up"
+    ;;
+esac
+
+if [[ $# -lt 1 ]]; then
   usage
   exit 1
 fi
 
 REPO_PATH="$1"
+shift
 
-if [[ ! -d "$REPO_PATH" ]]; then
-  echo "error: repo path does not exist or is not a directory: $REPO_PATH" >&2
-  exit 1
-fi
+ensure_repo "$REPO_PATH"
+TEMPLATE_DIR="$(find_template_dir)"
 
-SRC_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-DEST_DIR="$REPO_PATH/.devcontainer"
-
-mkdir -p "$DEST_DIR"
-
-for f in .dockerignore Dockerfile devcontainer.json post_install.py tmux.conf; do
-  if [[ ! -f "$SRC_DIR/$f" ]]; then
-    echo "error: missing template file: $SRC_DIR/$f" >&2
-    exit 1
-  fi
-  cp -f "$SRC_DIR/$f" "$DEST_DIR/$f"
-done
-
-global_ignore=""
-if command -v git >/dev/null 2>&1; then
-  global_ignore="$(git config --global --path core.excludesfile 2>/dev/null || true)"
-fi
-
-if [[ -z "$global_ignore" ]]; then
-  if [[ -n "${XDG_CONFIG_HOME:-}" && -f "$XDG_CONFIG_HOME/git/ignore" ]]; then
-    global_ignore="$XDG_CONFIG_HOME/git/ignore"
-  elif [[ -f "$HOME/.config/git/ignore" ]]; then
-    global_ignore="$HOME/.config/git/ignore"
-  elif [[ -f "$HOME/.gitignore_global" ]]; then
-    global_ignore="$HOME/.gitignore_global"
-  fi
-fi
-
-if [[ -n "$global_ignore" && -f "$global_ignore" ]]; then
-  cp -f "$global_ignore" "$DEST_DIR/.gitignore_global"
-  echo "  copied global gitignore from $global_ignore" >&2
-fi
-
-echo "✓ devcontainer installed to: $DEST_DIR" >&2
-echo "  next: open the repo in vscode and run 'reopen in container'." >&2
-echo "  cli: npm install -g @devcontainers/cli" >&2
-echo "       devcontainer build --workspace-folder $REPO_PATH" >&2
-echo "       devcontainer exec --workspace-folder $REPO_PATH tmux new -s agent" >&2
+case "$cmd" in
+  install)
+    copy_template "$REPO_PATH" "$TEMPLATE_DIR"
+    exit 0
+    ;;
+  build)
+    copy_template "$REPO_PATH" "$TEMPLATE_DIR"
+    require_devcontainer_cli
+    devcontainer build --workspace-folder "$REPO_PATH"
+    ;;
+  up)
+    copy_template "$REPO_PATH" "$TEMPLATE_DIR"
+    require_devcontainer_cli
+    devcontainer up --workspace-folder "$REPO_PATH"
+    devcontainer exec --workspace-folder "$REPO_PATH" tmux new -As "${DEVC_TMUX_SESSION:-agent}"
+    ;;
+  tmux)
+    copy_template "$REPO_PATH" "$TEMPLATE_DIR"
+    require_devcontainer_cli
+    devcontainer exec --workspace-folder "$REPO_PATH" tmux new -As "${DEVC_TMUX_SESSION:-agent}"
+    ;;
+  exec)
+    copy_template "$REPO_PATH" "$TEMPLATE_DIR"
+    require_devcontainer_cli
+    if [[ $# -gt 0 && "$1" == "--" ]]; then
+      shift
+    fi
+    [[ $# -gt 0 ]] || die "exec requires a command"
+    devcontainer exec --workspace-folder "$REPO_PATH" "$@"
+    ;;
+esac
