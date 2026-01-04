@@ -22,6 +22,13 @@ or manually:
 cp -r devcontainer path/to/repo/.devcontainer
 ```
 
+### post-install
+
+on container create, `.devcontainer/post_install.sh`:
+
+- sets `worktree.useRelativePaths` in the repo so host + container worktrees stay compatible
+- configures codex/claude defaults to skip permission prompts inside the container
+
 ### vscode
 
 open in vscode and run "reopen in container".
