@@ -49,6 +49,16 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     python3 \
   && rm -rf /var/lib/apt/lists/*
 
+# Install starship prompt.
+RUN curl -sS https://starship.rs/install.sh | sh -s -- -y \
+  && { \
+    echo ''; \
+    echo '# starship prompt'; \
+    echo 'if command -v starship >/dev/null 2>&1; then'; \
+    echo '  eval "$(starship init zsh)"'; \
+    echo 'fi'; \
+  } >> /etc/zsh/zshrc
+
 # Bring in node + npm from the official node image (fast, no apt deps).
 COPY --from=node /usr/local/ /usr/local/
 RUN node -v && npm -v
