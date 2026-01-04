@@ -27,6 +27,17 @@ else
   log "skipping git config (no repo at $workspace_dir)"
 fi
 
+tmux_src="$workspace_dir/.devcontainer/tmux.conf"
+tmux_dest="$HOME/.tmux.conf"
+if [[ -f "$tmux_src" ]]; then
+  if [[ -f "$tmux_dest" ]]; then
+    log "skipping tmux config (already exists at $tmux_dest)"
+  else
+    cp -f "$tmux_src" "$tmux_dest"
+    log "installed tmux config to $tmux_dest"
+  fi
+fi
+
 codex_dir="${CODEX_HOME:-$HOME/.codex}"
 mkdir -p "$codex_dir"
 codex_config="$codex_dir/config.toml"
@@ -55,6 +66,16 @@ JSON
   log "wrote default claude settings to $claude_config"
 else
   log "skipping claude settings (already exists at $claude_config)"
+fi
+
+zshrc="$HOME/.zshrc"
+if [[ -f "$zshrc" ]]; then
+  if grep -qE '^export TERM=xterm-256color$' "$zshrc"; then
+    tmp_zshrc="${zshrc}.tmp"
+    grep -vE '^export TERM=xterm-256color$' "$zshrc" >"$tmp_zshrc"
+    mv "$tmp_zshrc" "$zshrc"
+    log "removed TERM override from $zshrc"
+  fi
 fi
 
 log "configured defaults for container use"
