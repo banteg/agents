@@ -23,6 +23,7 @@ devc path/to/repo  # ← you are in tmux with claude and codex
 ```
 
 `devc path/to/repo` installs the template, runs `devcontainer up`, and drops you into tmux with claude and codex installed and configured with yolo defaults.
+`devc rebuild path/to/repo` forces a clean image rebuild (no cache) and keeps volumes intact.
 default shell is fish; zsh is installed for compatibility.
 `devc` overwrites `.devcontainer/` on every run. if you want to customize, fork the template and set `DEVC_TEMPLATE_DIR=/path/to/template`.
 if a global gitignore is configured on the host, it is copied to `.devcontainer/.gitignore_global`.
