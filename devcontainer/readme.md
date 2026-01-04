@@ -26,7 +26,7 @@ the install script copies only the devcontainer files (not this readme).
 
 ### post-install
 
-on container create, `.devcontainer/post_install.sh`:
+on container create, `.devcontainer/post_install.py`:
 
 - sets `worktree.useRelativePaths` in the repo so host + container worktrees stay compatible
 - sets `core.excludesfile` if `.devcontainer/.gitignore_global` exists

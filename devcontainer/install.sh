@@ -11,7 +11,7 @@ usage:
 this will copy:
   - devcontainer/Dockerfile
   - devcontainer/devcontainer.json
-  - devcontainer/post_install.sh
+  - devcontainer/post_install.py
   - devcontainer/tmux.conf
 
 into:
@@ -44,7 +44,7 @@ DEST_DIR="$REPO_PATH/.devcontainer"
 
 mkdir -p "$DEST_DIR"
 
-for f in Dockerfile devcontainer.json post_install.sh tmux.conf; do
+for f in Dockerfile devcontainer.json post_install.py tmux.conf; do
   if [[ ! -f "$SRC_DIR/$f" ]]; then
     echo "error: missing template file: $SRC_DIR/$f" >&2
     exit 1

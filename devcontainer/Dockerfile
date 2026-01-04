@@ -40,6 +40,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     git \
     nodejs \
     npm \
+    python3 \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
 
@@ -103,6 +104,9 @@ RUN npm install -g "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
 
 # Install uv
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Ensure uv is on PATH for the node user.
+ENV PATH="/home/${USERNAME}/.local/bin:${PATH}"
 
 # Passwordless sudo for the non-root user (for unattended / automation workflows).
 USER root
