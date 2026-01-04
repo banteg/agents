@@ -40,9 +40,10 @@
   "remoteUser": "node",
   "mounts": [
     "source=commandhistory,target=/commandhistory,type=volume",
-    "source=claude-config,target=/home/node/.claude,type=volume",
+    "source=claude-code-config,target=/home/node/.claude,type=volume",
     "source=codex-config,target=/home/node/.codex,type=volume",
-    "source=gh-config,target=/home/node/.config/gh,type=volume"
+    "source=gh-config,target=/home/node/.config/gh,type=volume",
+    "source=${localEnv:HOME}/.gitconfig,target=/home/node/.gitconfig,type=bind,consistency=cached,readonly"
   ],
   "containerEnv": {
     "NODE_OPTIONS": "--max-old-space-size=4096",
