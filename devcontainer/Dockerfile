@@ -9,6 +9,28 @@
 ARG NODE_IMAGE=node:22-bookworm-slim
 FROM ${NODE_IMAGE} AS node
 
+ARG CLAUDE_CODE_VERSION=latest
+ARG CODEX_VERSION=latest
+
+# Build-time npm defaults.
+ENV NPM_CONFIG_PREFIX=/usr/local/share/npm-global \
+    NPM_CONFIG_FUND=false \
+    NPM_CONFIG_AUDIT=false \
+    NPM_CONFIG_UPDATE_NOTIFIER=false \
+    NPM_CONFIG_PROGRESS=false \
+    NPM_CONFIG_CACHE=/root/.npm \
+    PATH="/usr/local/share/npm-global/bin:${PATH}"
+
+RUN mkdir -p /usr/local/share/npm-global
+
+# Install Claude Code + Codex CLI + pnpm in the node stage for faster rebuilds.
+RUN --mount=type=cache,target=/root/.npm \
+  npm install -g \
+    "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
+    "@openai/codex@${CODEX_VERSION}" \
+  && corepack enable --install-directory /usr/local/share/npm-global/bin \
+  && corepack prepare pnpm@latest --activate
+
 FROM ubuntu:25.10
 
 ARG TZ
@@ -102,24 +124,13 @@ RUN mkdir -p /workspace /home/node/.claude /home/node/.codex /home/node/.npm \
 
 WORKDIR /workspace
 
-# Make npm installs faster + more cache-friendly.
-ENV NPM_CONFIG_FUND=false \
-    NPM_CONFIG_AUDIT=false \
-    NPM_CONFIG_UPDATE_NOTIFIER=false \
-    NPM_CONFIG_PROGRESS=false \
-    NPM_CONFIG_CACHE=/root/.npm
-
 # Install global packages.
 ENV NPM_CONFIG_PREFIX=/usr/local/share/npm-global
 ENV PATH="${PATH}:/usr/local/share/npm-global/bin"
-
-# Install Claude Code + Codex CLI + pnpm.
-RUN --mount=type=cache,target=/root/.npm \
-  npm install -g \
-    "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}" \
-    "@openai/codex@${CODEX_VERSION}" \
-  && corepack enable --install-directory /usr/local/share/npm-global/bin \
-  && corepack prepare pnpm@latest --activate
+ENV NPM_CONFIG_FUND=false \
+    NPM_CONFIG_AUDIT=false \
+    NPM_CONFIG_UPDATE_NOTIFIER=false \
+    NPM_CONFIG_PROGRESS=false
 
 # Switch to non-root for normal dev.
 USER node

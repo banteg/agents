@@ -1,5 +1,6 @@
 {
   "name": "Agents Sandbox",
+  "init": true,
   "build": {
     "dockerfile": "Dockerfile",
     "args": {
