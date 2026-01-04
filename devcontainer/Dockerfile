@@ -50,6 +50,7 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     procps \
     sudo \
     zsh \
+    fish \
     man-db \
     unzip \
     gnupg2 \
@@ -80,7 +81,7 @@ RUN git config --system worktree.useRelativePaths true \
   && git config --system --add safe.directory /workspace
 
 RUN if ! id -u "node" >/dev/null 2>&1; then \
-    useradd -m -s /bin/zsh "node"; \
+    useradd -m -s /usr/bin/fish "node"; \
   fi
 
 # Ensure default node user has access to the global npm prefix.
@@ -120,7 +121,8 @@ ENV DEVCONTAINER=true
 
 # Create workspace + agent config dirs and set permissions.
 RUN mkdir -p /workspace /home/node/.claude /home/node/.codex /home/node/.npm \
-  && chown -R node:node /workspace /home/node/.claude /home/node/.codex /home/node/.npm
+  && touch /home/node/.zshrc \
+  && chown -R node:node /workspace /home/node/.claude /home/node/.codex /home/node/.npm /home/node/.zshrc
 
 WORKDIR /workspace
 
@@ -139,7 +141,7 @@ USER node
 ENV NPM_CONFIG_CACHE=/home/node/.npm
 
 # Default shell + editor.
-ENV SHELL=/bin/zsh
+ENV SHELL=/usr/bin/fish
 ENV EDITOR=nano
 ENV VISUAL=nano
 
