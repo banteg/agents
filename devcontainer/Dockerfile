@@ -23,7 +23,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     less \
     procps \
     sudo \
-    fzf \
     zsh \
     man-db \
     unzip \
