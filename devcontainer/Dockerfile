@@ -55,7 +55,8 @@ COPY --from=node /usr/local/ /usr/local/
 RUN node -v && npm -v
 
 # Ensure git worktrees use relative paths by default.
-RUN git config --system worktree.useRelativePaths true
+RUN git config --system worktree.useRelativePaths true \
+  && git config --system --add safe.directory /workspace
 
 RUN if ! id -u "$USERNAME" >/dev/null 2>&1; then \
     useradd -m -s /bin/zsh "$USERNAME"; \
@@ -65,18 +66,39 @@ RUN if ! id -u "$USERNAME" >/dev/null 2>&1; then \
 RUN mkdir -p /usr/local/share/npm-global \
   && chown -R "$USERNAME:$USERNAME" /usr/local/share
 
-# Persist bash history across container rebuilds.
-RUN SNIPPET="export PROMPT_COMMAND='history -a' && export HISTFILE=/commandhistory/.bash_history" \
-  && mkdir -p /commandhistory \
-  && touch /commandhistory/.bash_history \
-  && chown -R "${USERNAME}" /commandhistory
+# Persist shell history across container rebuilds.
+RUN mkdir -p /commandhistory \
+  && touch /commandhistory/.bash_history /commandhistory/.zsh_history \
+  && chown -R "${USERNAME}:${USERNAME}" /commandhistory \
+  && cat >/etc/profile.d/00-commandhistory.sh <<'EOF'
+# Persist interactive shell history in /commandhistory.
+if [ -d /commandhistory ]; then
+  export HISTSIZE=100000
+  export HISTFILESIZE=200000
+
+  if [ -n "${BASH_VERSION:-}" ]; then
+    export HISTFILE=/commandhistory/.bash_history
+    shopt -s histappend 2>/dev/null || true
+    PROMPT_COMMAND="history -a; ${PROMPT_COMMAND:-}"
+  fi
+
+  if [ -n "${ZSH_VERSION:-}" ]; then
+    export HISTFILE=/commandhistory/.zsh_history
+    export SAVEHIST=200000
+    setopt APPEND_HISTORY INC_APPEND_HISTORY SHARE_HISTORY HIST_IGNORE_ALL_DUPS HIST_REDUCE_BLANKS
+  fi
+fi
+EOF \
+  && echo '. /etc/profile.d/00-commandhistory.sh' >> /etc/bash.bashrc \
+  && touch /etc/zsh/zshrc \
+  && echo 'source /etc/profile.d/00-commandhistory.sh' >> /etc/zsh/zshrc
 
 # Helpful marker for shell prompts / scripts.
 ENV DEVCONTAINER=true
 
 # Create workspace + agent config dirs and set permissions.
-RUN mkdir -p /workspace /home/node/.claude /home/node/.codex \
-  && chown -R node:node /workspace /home/node/.claude /home/node/.codex
+RUN mkdir -p /workspace /home/node/.claude /home/node/.codex /home/node/.npm \
+  && chown -R node:node /workspace /home/node/.claude /home/node/.codex /home/node/.npm
 
 WORKDIR /workspace
 
@@ -101,6 +123,9 @@ RUN --mount=type=cache,target=/root/.npm \
 
 # Switch to non-root for normal dev.
 USER node
+
+# Runtime npm cache should be writable by node.
+ENV NPM_CONFIG_CACHE=/home/node/.npm
 
 # Default shell + editor.
 ENV SHELL=/bin/zsh
