@@ -1,8 +1,0 @@
-.DS_Store
-*.log
-*.zip
-*.tar
-*.tar.gz
-*.tgz
-.env
-.env.*

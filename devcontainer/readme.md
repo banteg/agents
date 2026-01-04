@@ -27,7 +27,6 @@ devc path/to/repo  # ← you are in tmux with claude and codex
 default shell is fish; zsh is installed for compatibility.
 **devc overwrites `.devcontainer/` on every run.** if you want to customize, fork the template and set `DEVC_TEMPLATE_DIR=/path/to/template`.
 if a global gitignore is configured on the host, it is copied to `.devcontainer/.gitignore_global`.
-the template includes `.dockerignore` to keep large or sensitive files out of the build context.
 build context defaults to `.devcontainer/`, so only the template files are sent to docker.
 
 notes:
