@@ -4,6 +4,11 @@ a devcontainer for running claude code and codex in yolo mode.
 
 based on anthropic's claude code devcontainer, modified to install codex and tmux, enable passwordless sudo, and remove firewall restrictions.
 
+## requirements
+
+- docker (or orbstack)
+- devcontainer cli (`npm install -g @devcontainers/cli`)
+
 ## use
 
 copy the contents to `.devcontainer/` in your repo, or use the helper script.
@@ -42,12 +47,16 @@ codex
 
 ### cli
 
-the helper expects the [devcontainer cli](https://github.com/devcontainers/cli).
+install the [devcontainer cli](https://github.com/devcontainers/cli):
 
 ```sh
 npm install -g @devcontainers/cli
+```
+
+then:
+
+```sh
 devc .
-devc exec . -- tmux new -As agent
 ```
 
 auth is persisted across rebuilds — `~/.codex/` and `~/.claude/` are mounted as docker volumes.
