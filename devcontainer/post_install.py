@@ -176,6 +176,34 @@ def ensure_fish_config() -> None:
     log(f"wrote default fish config to {fish_config}")
 
 
+def ensure_fish_history() -> None:
+    history_volume = Path("/commandhistory")
+    history_volume.mkdir(parents=True, exist_ok=True)
+    target = history_volume / ".fish_history"
+
+    fish_history = Path.home() / ".local" / "share" / "fish" / "fish_history"
+    fish_history.parent.mkdir(parents=True, exist_ok=True)
+
+    if fish_history.is_symlink():
+        if fish_history.resolve() == target:
+            return
+        fish_history.unlink()
+        fish_history.symlink_to(target)
+        log(f"updated fish history symlink at {fish_history}")
+        return
+
+    if fish_history.exists():
+        if not target.exists():
+            fish_history.replace(target)
+            log(f"moved fish history to {target}")
+        else:
+            log(f"existing fish history left at {fish_history}")
+            return
+
+    fish_history.symlink_to(target)
+    log(f"linked fish history to {target}")
+
+
 def ensure_dir_ownership(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
     try:
@@ -216,6 +244,7 @@ def main() -> None:
     ensure_dir_ownership(Path.home() / ".claude")
     ensure_dir_ownership(Path.home() / ".codex")
     ensure_dir_ownership(Path.home() / ".config" / "gh")
+    ensure_fish_history()
     ensure_global_gitignore(workspace)
     ensure_codex_config()
     ensure_claude_config()

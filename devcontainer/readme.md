@@ -46,6 +46,7 @@ on container create, `.devcontainer/post_install.py`:
 - installs a default `~/.tmux.conf` if missing
 - configures codex/claude defaults to skip permission prompts inside the container
 - writes a default fish config if missing
+- persists fish history in `/commandhistory/.fish_history`
 
 ### vscode
 
