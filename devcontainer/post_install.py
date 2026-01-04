@@ -14,9 +14,14 @@ function fish_greeting
 end
 
 function fish_prompt
+  set -g __fish_git_prompt_showdirtystate 1
+  set -g __fish_git_prompt_showuntrackedfiles 1
+  set -g __fish_git_prompt_showupstream auto
+
   set_color cyan
   echo -n (prompt_pwd)
   set_color normal
+  fish_vcs_prompt
   echo -n " > "
 end
 """
