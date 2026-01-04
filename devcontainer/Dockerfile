@@ -108,7 +108,7 @@ ENV EDITOR=nano
 ENV VISUAL=nano
 
 # Install uv
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
 # Ensure uv is on PATH for the node user.
 ENV PATH="/home/${USERNAME}/.local/bin:${PATH}"
