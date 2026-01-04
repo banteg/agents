@@ -36,8 +36,8 @@ on container create, `.devcontainer/post_install.sh`:
 open in vscode and run "reopen in container".
 
 ```sh
-claude --dangerously-skip-permissions
-codex --yolo
+claude
+codex
 ```
 
 ### cli
@@ -50,8 +50,8 @@ devcontainer build --workspace-folder .
 devcontainer up --workspace-folder .
 devcontainer exec --workspace-folder . tmux new -s agent
 # inside:
-claude --dangerously-skip-permissions
-codex --yolo
+claude
+codex
 # reattach with:
 devcontainer exec --workspace-folder . tmux attach -t agent
 ```
