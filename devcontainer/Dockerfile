@@ -38,7 +38,6 @@ ENV TZ="${TZ}"
 
 ARG CLAUDE_CODE_VERSION=latest
 ARG CODEX_VERSION=latest
-ARG USERNAME=node
 
 # Install common dev tools.
 # Note: we intentionally do NOT install iptables/ipset or ship a firewall script.
@@ -80,18 +79,18 @@ RUN node -v && npm -v
 RUN git config --system worktree.useRelativePaths true \
   && git config --system --add safe.directory /workspace
 
-RUN if ! id -u "$USERNAME" >/dev/null 2>&1; then \
-    useradd -m -s /bin/zsh "$USERNAME"; \
+RUN if ! id -u "node" >/dev/null 2>&1; then \
+    useradd -m -s /bin/zsh "node"; \
   fi
 
 # Ensure default node user has access to the global npm prefix.
 RUN mkdir -p /usr/local/share/npm-global \
-  && chown -R "$USERNAME:$USERNAME" /usr/local/share
+  && chown -R "node:node" /usr/local/share
 
 # Persist shell history across container rebuilds.
 RUN mkdir -p /commandhistory \
   && touch /commandhistory/.bash_history /commandhistory/.zsh_history \
-  && chown -R "${USERNAME}:${USERNAME}" /commandhistory \
+  && chown -R "node:node" /commandhistory \
   && cat >/etc/profile.d/00-commandhistory.sh <<'EOF'
 # Persist interactive shell history in /commandhistory.
 if [ -d /commandhistory ]; then
@@ -148,7 +147,7 @@ ENV VISUAL=nano
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
 # Ensure uv is on PATH for the node user.
-ENV PATH="/home/${USERNAME}/.local/bin:${PATH}"
+ENV PATH="/home/node/.local/bin:${PATH}"
 
 # Passwordless sudo for the non-root user (for unattended / automation workflows).
 USER root
