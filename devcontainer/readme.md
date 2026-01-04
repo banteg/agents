@@ -44,6 +44,7 @@ you can also run devcontainers from the terminal using the [devcontainer cli](ht
 
 ```sh
 npm install -g @devcontainers/cli
+devcontainer build --workspace-folder .
 devcontainer up --workspace-folder .
 devcontainer exec --workspace-folder . tmux new -s agent
 # inside:
