@@ -16,7 +16,6 @@ ENV TZ="${TZ}"
 
 ARG CLAUDE_CODE_VERSION=latest
 ARG CODEX_VERSION=latest
-ARG GIT_DELTA_VERSION=0.18.2
 ARG USERNAME=node
 
 # Install common dev tools.
@@ -43,19 +42,13 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
     dnsutils \
     git \
     ripgrep \
-    lazygit \
+    zoxide \
+    fd-find \
     python3 \
   && rm -rf /var/lib/apt/lists/*
-
-# Install starship prompt.
-RUN curl -sS https://starship.rs/install.sh | sh -s -- -y \
-  && { \
-    echo ''; \
-    echo '# starship prompt'; \
-    echo 'if command -v starship >/dev/null 2>&1; then'; \
-    echo '  eval "$(starship init zsh)"'; \
-    echo 'fi'; \
-  } >> /etc/zsh/zshrc
+RUN if command -v fdfind >/dev/null 2>&1 && [ ! -e /usr/local/bin/fd ]; then \
+    ln -s /usr/bin/fdfind /usr/local/bin/fd; \
+  fi
 
 # Bring in node + npm from the official node image (fast, no apt deps).
 COPY --from=node /usr/local/ /usr/local/
@@ -86,12 +79,6 @@ RUN mkdir -p /workspace /home/node/.claude /home/node/.codex \
   && chown -R node:node /workspace /home/node/.claude /home/node/.codex
 
 WORKDIR /workspace
-
-# Install git-delta (nice diffs in reviews).
-RUN ARCH="$(dpkg --print-architecture)" \
-  && wget -q "https://github.com/dandavison/delta/releases/download/${GIT_DELTA_VERSION}/git-delta_${GIT_DELTA_VERSION}_${ARCH}.deb" \
-  && dpkg -i "git-delta_${GIT_DELTA_VERSION}_${ARCH}.deb" \
-  && rm "git-delta_${GIT_DELTA_VERSION}_${ARCH}.deb"
 
 # Make npm installs faster + more cache-friendly.
 ENV NPM_CONFIG_FUND=false \
