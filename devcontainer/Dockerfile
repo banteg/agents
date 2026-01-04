@@ -144,8 +144,8 @@ ENV NPM_CONFIG_CACHE=/home/node/.npm
 ENV HOME=/home/node
 ENV XDG_CONFIG_HOME=/home/node/.config
 ENV SHELL=/usr/bin/fish
-ENV EDITOR=nano
-ENV VISUAL=nano
+ENV EDITOR=vim
+ENV VISUAL=vim
 
 # Install uv
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv

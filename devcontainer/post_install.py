@@ -10,15 +10,15 @@ from pathlib import Path
 
 FISH_CONFIG = """\
 # default fish config for the devcontainer
+set -g __fish_git_prompt_showdirtystate 0
+set -g __fish_git_prompt_showuntrackedfiles 0
+set -g __fish_git_prompt_showupstream none
+
 function fish_greeting
   echo "https://github.com/banteg/agents 2026-01-04"
 end
 
 function fish_prompt
-  set -g __fish_git_prompt_showdirtystate 1
-  set -g __fish_git_prompt_showuntrackedfiles 1
-  set -g __fish_git_prompt_showupstream auto
-
   set_color cyan
   echo -n (prompt_pwd)
   set_color normal
