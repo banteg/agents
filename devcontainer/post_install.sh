@@ -44,34 +44,17 @@ claude_dir="${CLAUDE_CONFIG_DIR:-$HOME/.claude}"
 mkdir -p "$claude_dir"
 claude_config="$claude_dir/settings.json"
 
-node - "$claude_config" <<'NODE'
-const fs = require("fs");
-const path = require("path");
-
-const settingsPath = process.argv[1];
-let data = {};
-
-if (fs.existsSync(settingsPath)) {
-  try {
-    data = JSON.parse(fs.readFileSync(settingsPath, "utf8"));
-  } catch (err) {
-    const backupPath = `${settingsPath}.bak.${Date.now()}`;
-    fs.copyFileSync(settingsPath, backupPath);
-    data = {};
-    console.error(`post-install: invalid JSON in ${settingsPath}, backed up to ${backupPath}`);
+if [[ ! -f "$claude_config" ]]; then
+  cat >"$claude_config" <<'JSON'
+{
+  "permissions": {
+    "defaultMode": "bypassPermissions"
   }
 }
+JSON
+  log "wrote default claude settings to $claude_config"
+else
+  log "skipping claude settings (already exists at $claude_config)"
+fi
 
-if (typeof data !== "object" || data === null) {
-  data = {};
-}
-
-data.permissions = Object.assign({}, data.permissions, {
-  defaultMode: "bypassPermissions",
-});
-
-fs.mkdirSync(path.dirname(settingsPath), { recursive: true });
-fs.writeFileSync(settingsPath, JSON.stringify(data, null, 2) + "\n");
-NODE
-
-log "configured codex and claude defaults for container use"
+log "configured codex defaults for container use"
