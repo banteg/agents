@@ -43,6 +43,7 @@
     "source=claude-code-config,target=/home/node/.claude,type=volume",
     "source=codex-config,target=/home/node/.codex,type=volume",
     "source=gh-config,target=/home/node/.config/gh,type=volume",
+    "source=${localEnv:HOME}/.gitignore_global,target=/home/node/.gitignore_global,type=bind,consistency=cached,readonly",
     "source=${localEnv:HOME}/.gitconfig,target=/home/node/.gitconfig_host,type=bind,consistency=cached,readonly"
   ],
   "containerEnv": {

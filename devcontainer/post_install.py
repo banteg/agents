@@ -40,17 +40,21 @@ def configure_git(cwd: Path) -> None:
     run_git(["config", "--local", "worktree.useRelativePaths", "true"], cwd, check=True)
     log(f"enabled git worktree.useRelativePaths in {cwd}")
 
-    gitignore_global = cwd / ".devcontainer" / ".gitignore_global"
-    if not gitignore_global.exists():
-        return
-
     result = run_git(["config", "--local", "--get", "core.excludesfile"], cwd)
     if result.returncode == 0 and result.stdout.strip():
         log("skipping core.excludesfile (already set)")
         return
 
-    run_git(["config", "--local", "core.excludesfile", ".devcontainer/.gitignore_global"], cwd, check=True)
-    log("set core.excludesfile to .devcontainer/.gitignore_global")
+    home_ignore = Path.home() / ".gitignore_global"
+    if home_ignore.exists():
+        run_git(["config", "--local", "core.excludesfile", str(home_ignore)], cwd, check=True)
+        log("set core.excludesfile to ~/.gitignore_global")
+        return
+
+    gitignore_global = cwd / ".devcontainer" / ".gitignore_global"
+    if gitignore_global.exists():
+        run_git(["config", "--local", "core.excludesfile", ".devcontainer/.gitignore_global"], cwd, check=True)
+        log("set core.excludesfile to .devcontainer/.gitignore_global")
 
 
 def ensure_gitconfig_includes_host() -> None:
