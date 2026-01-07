@@ -16,6 +16,14 @@ from sulguk import transform_html
 CREDS_PATH = Path.home() / ".codex" / "telegram.toml"
 ERR_PATH = Path.home() / ".codex" / "telegram_last_error.txt"
 
+_MD_RENDERER = MarkdownIt("commonmark", {"html": False})
+_BULLET_RE = re.compile(r"(?m)^(\s*)•")
+_LIST_PARA_RE = re.compile(r"(?s)<li([^>]*)>\s*<p>(.*?)</p>\s*</li>")
+
+
+def _tighten_list_paragraphs(html: str) -> str:
+    return _LIST_PARA_RE.sub(r"<li\1>\2</li>", html)
+
 
 def main() -> None:
     creds = tomllib.loads(CREDS_PATH.read_text(encoding="utf-8"))
@@ -29,17 +37,19 @@ def main() -> None:
     if thread_id:
         md += f"\n\n`codex resume {thread_id}`"
 
-    html = MarkdownIt("commonmark", {"html": False}).render(md)
+    html = _MD_RENDERER.render(md)
+    html = _tighten_list_paragraphs(html)
     rendered = transform_html(html)
 
-    text = re.sub(r"(?m)^(\s*)•", r"\1-", rendered.text)
+    text = _BULLET_RE.sub(r"\1-", rendered.text)
+    entities = [dict(e) for e in rendered.entities]
 
     r = requests.post(
         f"https://api.telegram.org/bot{bot_token}/sendMessage",
         json={
             "chat_id": chat_id,
             "text": text,
-            "entities": rendered.entities,
+            "entities": entities,
             "disable_web_page_preview": True,
         },
         timeout=15,
