@@ -61,6 +61,21 @@ enable with `git config --global worktree.useRelativePaths true`
 
 new worktrees will use relative paths in all repos. to migrate existing worktrees to relative paths `git worktree repair`
 
+## seatbelt sandbox
+
+if you keep getting permission prompts in claude code and want it to behave more like codex, enable macos seatbelt sandboxing. this runs bash commands inside macos's seatbelt sandbox, which restricts file writes to the project directory and limits network access. combined with auto-approval, this lets you skip most permission prompts while staying protected.
+
+add this to `~/.claude/settings.json`:
+
+```json
+{
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true
+  }
+}
+```
+
 ## devcontainer
 
 running agents unattended (yolo mode) is best done in a devcontainer. it provides isolation and lets you skip permission prompts. you will need docker, i prefer [orbstack](https://orbstack.dev/) as a drop-in replacement.
