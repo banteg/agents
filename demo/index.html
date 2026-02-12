@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creator Coins: The Timing Trap</title>
+  
+  <!-- Meta -->
+  <meta name="description" content="A 4:30 investigation into why creator tokens behave like memecoins. Real data from $JESSE and $thenickshirley launches.">
+  
+  <!-- Open Graph -->
+  <meta property="og:title" content="Creator Coins: The Timing Trap">
+  <meta property="og:description" content="A 4:30 investigation with real data: $JESSE declined 73-87% from $25M peak. $thenickshirley dropped 73% from $15M. Snipers made $1.3M in the launch block.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://demo.creatorvaults.fun">
+  
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Creator Coins: The Timing Trap">
+  <meta name="twitter:description" content="Real data from Base chain: Why creator tokens follow the same pump-dump pattern as memecoins.">
+  
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%23000'/><rect x='20' y='20' width='60' height='60' fill='none' stroke='%23fff' stroke-width='2'/></svg>">
+  
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: #000;
+      color: #fff;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      overflow-x: hidden;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 4rem);
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.5rem;
+      opacity: 0.95;
+    }
+
+    .subtitle {
+      font-size: clamp(1rem, 2vw, 1.5rem);
+      font-weight: 300;
+      opacity: 0.6;
+      margin-bottom: 3rem;
+    }
+
+    .player-container {
+      background: #0a0a0a;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+
+    .audio-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    button {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      color: #fff;
+      padding: 0.75rem 1.5rem;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+
+    button:hover {
+      background: rgba(255,255,255,0.2);
+      border-color: rgba(255,255,255,0.3);
+    }
+
+    .timeline {
+      width: 100%;
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .timeline-progress {
+      height: 100%;
+      background: rgba(255,255,255,0.4);
+      border-radius: 2px;
+      transition: width 0.1s linear;
+    }
+
+    .time-display {
+      font-family: 'Monaco', monospace;
+      font-size: 0.875rem;
+      opacity: 0.6;
+      min-width: 100px;
+    }
+
+    .scene {
+      min-height: 60vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 3rem 0;
+      opacity: 0.3;
+      transition: opacity 0.5s;
+    }
+
+    .scene.active {
+      opacity: 1;
+    }
+
+    .scene-title {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      opacity: 0.5;
+      margin-bottom: 1rem;
+    }
+
+    .scene-content {
+      font-size: clamp(1.5rem, 3vw, 2.5rem);
+      font-weight: 300;
+      line-height: 1.4;
+      margin-bottom: 2rem;
+      animation: fadeIn 0.8s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .scene-data {
+      font-size: 1rem;
+      opacity: 0.7;
+      line-height: 1.6;
+    }
+
+    .chart-embed {
+      width: 100%;
+      height: 500px;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
+      margin: 2rem 0;
+      background: #0a0a0a;
+    }
+
+    .data-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+      margin: 2rem 0;
+    }
+
+    .data-card {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 4px;
+      padding: 1.5rem;
+    }
+
+    .data-label {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      opacity: 0.5;
+      margin-bottom: 0.5rem;
+    }
+
+    .data-value {
+      font-size: 1.5rem;
+      font-weight: 300;
+      font-family: 'Monaco', monospace;
+    }
+
+    a {
+      color: rgba(255,255,255,0.6);
+      text-decoration: none;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+      transition: all 0.2s;
+    }
+
+    a:hover {
+      color: rgba(255,255,255,0.9);
+      border-bottom-color: rgba(255,255,255,0.5);
+    }
+
+    .launch-flash {
+      position: fixed;
+      inset: 0;
+      background: rgba(255,255,255,0.1);
+      pointer-events: none;
+      opacity: 0;
+      animation: flash 0.6s ease-out;
+    }
+
+    @keyframes flash {
+      0%, 100% { opacity: 0; }
+      50% { opacity: 1; }
+    }
+
+    .data-highlight {
+      background: rgba(255,255,255,0.08);
+      border-color: rgba(255,255,255,0.3);
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+      .chart-embed {
+        height: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Creator Coins: The Timing Trap</h1>
+    <p class="subtitle">A 4:30 investigation into why creator tokens behave like memecoins</p>
+
+    <div class="player-container">
+      <div class="audio-controls">
+        <button id="playBtn">Play</button>
+        <div class="timeline" id="timeline">
+          <div class="timeline-progress" id="progress"></div>
+        </div>
+        <div class="time-display" id="timeDisplay">0:00 / 4:30</div>
+      </div>
+      <audio id="audio" preload="auto">
+        <source src="https://assets.creatorvaults.fun/audio/creatorvaults_FINAL_music_finishes.mp3" type="audio/mpeg">
+      </audio>
+    </div>
+
+    <!-- SCENE 1: THESIS -->
+    <div class="scene" data-start="0" data-end="38">
+      <div class="scene-title">Act I: Thesis (0:00-0:38)</div>
+      <div class="scene-content">
+        They call them creator coins.<br>
+        New names. New faces.<br>
+        The same old game.
+      </div>
+      <div class="scene-data">
+        <p>Real data: $JESSE token (Base chain)</p>
+        <p style="margin-top: 1rem; opacity: 0.5; font-size: 0.875rem;">
+          <a href="https://dexscreener.com/base/0xc39acb3ce11ebcd3e1c5d67cdfb8707ab12674449fdab859327a8aabee03cd10" target="_blank">View on DexScreener →</a>
+        </p>
+      </div>
+      <div class="data-grid">
+        <div class="data-card">
+          <div class="data-label">Peak Market Cap</div>
+          <div class="data-value">$25-26M</div>
+        </div>
+        <div class="data-card">
+          <div class="data-label">Current Value</div>
+          <div class="data-value">$3.3-6.6M</div>
+        </div>
+        <div class="data-card">
+          <div class="data-label">Decline</div>
+          <div class="data-value">-73-87%</div>
+        </div>
+        <div class="data-card">
+          <div class="data-label">Timeline</div>
+          <div class="data-value">47 days</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE 2: MECHANISM -->
+    <div class="scene" data-start="38" data-end="68">
+      <div class="scene-title">Act II: Mechanism (0:38-1:08)</div>
+      <div class="scene-content">
+        Prices rise because someone believes they will.<br>
+        Prices fall when they don't.
+      </div>
+      <div class="scene-data">
+        <p><strong>Belief:</strong> Jesse Pollak announces $JESSE launch (Nov 19, 2025)</p>
+        <p><strong>Narrative:</strong> 12,000+ buy transactions in 24 hours</p>
+        <p><strong>Timing:</strong> Nov 20, 9:00 AM PST launch</p>
+        <p><strong>Exit:</strong> $1.3M profit by snipers who bought 261.7M tokens (52% supply) in the same block</p>
+      </div>
+    </div>
+
+    <!-- SCENE 3: PATTERN -->
+    <div class="scene" data-start="68" data-end="92">
+      <div class="scene-title">Act III: Pattern (1:08-1:32)</div>
+      <div class="scene-content">
+        This isn't theory.<br>
+        We've seen it before.<br>
+        Different creator. Different branding.<br>
+        The same sequence of events.
+      </div>
+      <div class="data-grid">
+        <div class="data-card">
+          <div class="data-label">$JESSE (Jesse Pollak)</div>
+          <div class="data-value">-73-87%</div>
+          <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.5;">
+            Nov 20, 2025<br>
+            25-26M → 3.3-6.6M
+          </p>
+        </div>
+        <div class="data-card">
+          <div class="data-label">$thenickshirley (Nick Shirley)</div>
+          <div class="data-value">-73%</div>
+          <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.5;">
+            Dec 28, 2025 → Jan 2, 2026<br>
+            15M → 4.0M
+          </p>
+        </div>
+        <div class="data-card">
+          <div class="data-label">Friend.tech</div>
+          <div class="data-value">Similar</div>
+          <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.5;">
+            Aug-Sep 2023<br>
+            Classic pump-dump pattern
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCENE 4: JESSE (THE BIG ONE) -->
+    <div class="scene" data-start="92" data-end="152">
+      <div class="scene-title">Act IV: JESSE - The Forensic Breakdown (1:32-2:32)</div>
+      <div class="scene-content">
+        Early belief forms first.<br>
+        Attention gathers. Liquidity follows.<br>
+        The announcement arrives.
+      </div>
+      <div class="scene-data">
+        <p style="font-size: 1.25rem; margin: 2rem 0;">
+          <strong>November 20, 2025, 9:00 AM PST</strong><br>
+          The launch moment.
+        </p>
+        <div class="data-grid">
+          <div class="data-card">
+            <div class="data-label">Sniped Tokens</div>
+            <div class="data-value">261.7M</div>
+            <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.5;">52% of total supply</p>
+          </div>
+          <div class="data-card">
+            <div class="data-label">Timing</div>
+            <div class="data-value">Same block</div>
+            <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.5;">As token issuance</p>
+          </div>
+          <div class="data-card">
+            <div class="data-label">Sniper Profit</div>
+            <div class="data-value">$1.3M</div>
+            <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.5;">Combined, two wallets</p>
+          </div>
+          <div class="data-card">
+            <div class="data-label">First 24h</div>
+            <div class="data-value">12,000+</div>
+            <p style="font-size: 0.75rem; margin-top: 0.5rem; opacity: 0.5;">Buy transactions</p>
+          </div>
+        </div>
+        <p style="margin-top: 2rem; opacity: 0.6;">
+          Then behaviour changes. Early conviction becomes early exits.<br>
+          The curve reveals itself.
+        </p>
+      </div>
+    </div>
+
+    <!-- SCENE 5: CURVE -->
+    <div class="scene" data-start="152" data-end="182">
+      <div class="scene-title">Act V: The Curve (2:32-3:02)</div>
+      <div class="scene-content">
+        Once you see it, you can't unsee it.<br>
+        If the game is predictable, the solution isn't denial.<br>
+        It's structure.
+      </div>
+      <div class="scene-data">
+        <p><strong>The exit window was narrow.</strong></p>
+        <p style="margin-top: 1rem;">Most value extracted in first 24-48 hours.</p>
+        <p style="margin-top: 1rem;">47 days of decline followed.</p>
+        <p style="margin-top: 2rem; font-size: 0.875rem; opacity: 0.5;">
+          <a href="https://dexscreener.com/base/0xc39acb3ce11ebcd3e1c5d67cdfb8707ab12674449fdab859327a8aabee03cd10" target="_blank">See the full chart on DexScreener →</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- SCENE 6: TURN -->
+    <div class="scene" data-start="182" data-end="202">
+      <div class="scene-title">Act VI: The Turn (3:02-3:22)</div>
+      <div class="scene-content">
+        Not another token. Not another promise.<br>
+        A different mechanism.<br>
+        Change the structure. Change where value sits.
+      </div>
+    </div>
+
+    <!-- SCENE 7: VAULTS -->
+    <div class="scene" data-start="202" data-end="246">
+      <div class="scene-title">Act VII: Creator Vaults (3:22-4:06)</div>
+      <div class="scene-content">
+        Creator Vaults change where value accumulates.<br>
+        Instead of relying on hype, they rely on flow.
+      </div>
+      <div class="scene-data">
+        <p>Capital enters a vault. The vault deploys it deliberately.</p>
+        <p style="margin-top: 1rem;">Yield is generated over time.</p>
+        <p style="margin-top: 1rem;">Value builds within the system—not at the moment of entry.</p>
+        <p style="margin-top: 2rem; opacity: 0.6;">
+          No promised multiples. No guaranteed exits.<br>
+          Just transparent mechanics.
+        </p>
+      </div>
+    </div>
+
+    <!-- SCENE 8: CLOSE -->
+    <div class="scene" data-start="246" data-end="270">
+      <div class="scene-title">Act VIII: Close (4:06-4:30)</div>
+      <div class="scene-content">
+        Creators are incentivised to build, not to exit.<br>
+        Participants are rewarded for staying, not rushing.<br>
+        The system slows the game down.
+      </div>
+      <div class="scene-data">
+        <p style="font-size: 1.5rem; margin-top: 2rem; opacity: 0.8;">
+          Markets don't need new stories.<br>
+          They need better containers.
+        </p>
+      </div>
+    </div>
+
+    <div style="padding: 4rem 0; text-align: center; opacity: 0.4; font-size: 0.875rem;">
+      <p>All data sourced from DexScreener, Base chain, November 2025 - January 2026</p>
+      <p style="margin-top: 0.5rem;">No hypotheticals. No promises. Just pattern recognition.</p>
+      <p style="margin-top: 2rem; font-size: 0.75rem; opacity: 0.3;">
+        Keyboard shortcuts: Space (play/pause) • ← → (skip 10s)
+      </p>
+    </div>
+  </div>
+
+  <script>
+    const audio = document.getElementById('audio');
+    const playBtn = document.getElementById('playBtn');
+    const timeline = document.getElementById('timeline');
+    const progress = document.getElementById('progress');
+    const timeDisplay = document.getElementById('timeDisplay');
+    const scenes = document.querySelectorAll('.scene');
+
+    let isPlaying = false;
+
+    // Play/Pause
+    playBtn.addEventListener('click', () => {
+      if (isPlaying) {
+        audio.pause();
+        playBtn.textContent = 'Play';
+      } else {
+        audio.play();
+        playBtn.textContent = 'Pause';
+      }
+      isPlaying = !isPlaying;
+    });
+
+    let hasFlashed = false;
+
+    // Update progress and active scene
+    audio.addEventListener('timeupdate', () => {
+      const currentTime = audio.currentTime;
+      const duration = audio.duration || 270; // 4:30
+      
+      // Update progress bar
+      const progressPercent = (currentTime / duration) * 100;
+      progress.style.width = progressPercent + '%';
+      
+      // Update time display
+      const currentMin = Math.floor(currentTime / 60);
+      const currentSec = Math.floor(currentTime % 60);
+      const totalMin = Math.floor(duration / 60);
+      const totalSec = Math.floor(duration % 60);
+      timeDisplay.textContent = `${currentMin}:${currentSec.toString().padStart(2, '0')} / ${totalMin}:${totalSec.toString().padStart(2, '0')}`;
+      
+      // THE LAUNCH MOMENT - Flash at 108.6s
+      if (currentTime >= 108.6 && currentTime < 109.2 && !hasFlashed) {
+        const flashEl = document.createElement('div');
+        flashEl.className = 'launch-flash';
+        document.body.appendChild(flashEl);
+        setTimeout(() => flashEl.remove(), 600);
+        hasFlashed = true;
+      }
+      if (currentTime < 108.6) {
+        hasFlashed = false;
+      }
+      
+      // Update active scene
+      scenes.forEach(scene => {
+        const start = parseFloat(scene.dataset.start);
+        const end = parseFloat(scene.dataset.end);
+        if (currentTime >= start && currentTime < end) {
+          scene.classList.add('active');
+        } else {
+          scene.classList.remove('active');
+        }
+      });
+    });
+
+    // Seek on timeline click
+    timeline.addEventListener('click', (e) => {
+      const rect = timeline.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const width = rect.width;
+      const percent = x / width;
+      audio.currentTime = percent * audio.duration;
+    });
+
+    // Reset on end
+    audio.addEventListener('ended', () => {
+      isPlaying = false;
+      playBtn.textContent = 'Play';
+    });
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', (e) => {
+      // Spacebar: play/pause
+      if (e.code === 'Space' && e.target === document.body) {
+        e.preventDefault();
+        playBtn.click();
+      }
+      // Arrow Left: rewind 10s
+      if (e.code === 'ArrowLeft') {
+        audio.currentTime = Math.max(0, audio.currentTime - 10);
+      }
+      // Arrow Right: forward 10s
+      if (e.code === 'ArrowRight') {
+        audio.currentTime = Math.min(audio.duration, audio.currentTime + 10);
+      }
+    });
+
+    // Activate first scene on load
+    window.addEventListener('load', () => {
+      scenes[0].classList.add('active');
+    });
+  </script>
+</body>
+</html>
+

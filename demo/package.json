@@ -1,0 +1,13 @@
+{
+  "name": "creatorvaults-demo",
+  "version": "1.0.0",
+  "description": "Creator Coins: The Timing Trap - A 4:30 investigation",
+  "scripts": {
+    "dev": "npx serve -l 3000",
+    "deploy": "vercel --prod"
+  },
+  "keywords": ["creator-coins", "tokenomics", "defi", "base"],
+  "author": "Creator Vaults",
+  "license": "MIT"
+}
+
