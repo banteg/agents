@@ -19,20 +19,45 @@ ERR_PATH = Path.home() / ".codex" / "telegram_last_error.txt"
 _MD_RENDERER = MarkdownIt("commonmark", {"html": False})
 _BULLET_RE = re.compile(r"(?m)^(\s*)•")
 _LIST_PARA_RE = re.compile(r"(?s)<li([^>]*)>\s*<p>(.*?)</p>\s*</li>")
+_AUTO_APPROVE_KEYS = {"risk_level", "user_authorization", "outcome", "rationale"}
 
 
 def _tighten_list_paragraphs(html: str) -> str:
     return _LIST_PARA_RE.sub(r"<li\1>\2</li>", html)
 
 
+def _json_object(value: object) -> dict[str, object] | None:
+    if not isinstance(value, str):
+        return None
+    text = value.strip()
+    if not (text.startswith("{") and text.endswith("}")):
+        return None
+    try:
+        parsed = json.loads(text)
+    except json.JSONDecodeError:
+        return None
+    return parsed if isinstance(parsed, dict) else None
+
+
+def _is_auto_approve_message(value: object) -> bool:
+    data = _json_object(value)
+    return data is not None and _AUTO_APPROVE_KEYS <= data.keys() and data["outcome"] == "allow"
+
+
+def _should_skip_event(event: dict[str, object]) -> bool:
+    return _is_auto_approve_message(event.get("last-assistant-message"))
+
+
 def main() -> None:
+    event = json.loads(sys.argv[1])
+    if _should_skip_event(event):
+        return
+
     creds = tomllib.loads(CREDS_PATH.read_text(encoding="utf-8"))
     bot_token = creds["bot_token"]
     chat_id = creds["chat_id"]
 
-    event = json.loads(sys.argv[1])
-
-    md = event["last-assistant-message"].rstrip()
+    md = str(event["last-assistant-message"]).rstrip()
     thread_id = event.get("thread-id")
     if thread_id:
         md += f"\n\n`codex resume {thread_id}`"

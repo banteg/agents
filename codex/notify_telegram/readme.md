@@ -26,3 +26,4 @@ notify = ["uv", "run", "-q", "/home/user/.codex/notify_telegram.py"]
 - reads `last-assistant-message` and treats it as markdown
 - renders markdown to html, converts to telegram text/entities via `sulguk`, then posts with `requests`
 - normalizes list bullets from `•` to `-` for consistent telegram output
+- skips auto-approve review summaries emitted by Codex approval auto-review agents
