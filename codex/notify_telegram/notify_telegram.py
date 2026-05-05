@@ -39,17 +39,22 @@ def _json_object(value: object) -> dict[str, object] | None:
     return parsed if isinstance(parsed, dict) else None
 
 
-def _is_auto_approve_message(value: object) -> bool:
+def _is_ignored_json_message(value: object) -> bool:
     data = _json_object(value)
-    return (
-        data is not None
-        and data.get("outcome") == "allow"
+    if data is None:
+        return False
+
+    is_auto_approve = (
+        data.get("outcome") == "allow"
         and data.keys() <= _AUTO_APPROVE_KEYS
     )
+    is_title_only = isinstance(data.get("title"), str) and set(data) == {"title"}
+    is_empty_exclude = data == {"exclude": []}
+    return is_auto_approve or is_title_only or is_empty_exclude
 
 
 def _should_skip_event(event: dict[str, object]) -> bool:
-    return _is_auto_approve_message(event.get("last-assistant-message"))
+    return _is_ignored_json_message(event.get("last-assistant-message"))
 
 
 def main() -> None:
