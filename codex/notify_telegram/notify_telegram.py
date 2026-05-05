@@ -41,7 +41,11 @@ def _json_object(value: object) -> dict[str, object] | None:
 
 def _is_auto_approve_message(value: object) -> bool:
     data = _json_object(value)
-    return data is not None and _AUTO_APPROVE_KEYS <= data.keys() and data["outcome"] == "allow"
+    return (
+        data is not None
+        and data.get("outcome") == "allow"
+        and data.keys() <= _AUTO_APPROVE_KEYS
+    )
 
 
 def _should_skip_event(event: dict[str, object]) -> bool:
