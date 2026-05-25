@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["requests", "markdown-it-py", "sulguk>=0.11.1"]
+# dependencies = ["requests", "markdown-it-py", "sulguk>=0.12.0"]
 # ///
 import json
 import re
 import sys
 import tomllib
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
+from urllib.parse import urlparse
 
 import requests
 from markdown_it import MarkdownIt
@@ -18,12 +21,123 @@ ERR_PATH = Path.home() / ".codex" / "telegram_last_error.txt"
 
 _MD_RENDERER = MarkdownIt("commonmark", {"html": False})
 _BULLET_RE = re.compile(r"(?m)^(\s*)•")
-_LIST_PARA_RE = re.compile(r"(?s)<li([^>]*)>\s*<p>(.*?)</p>\s*</li>")
+_FENCE_RE = re.compile(r"^(?P<indent>[ \t]*)(?P<fence>[`~]{3,})(?P<info>.*)$")
+_ORDERED_ITEM_RE = re.compile(r"^(?P<indent>[ \t]{0,3})(?P<marker>\d+[.)])\s+")
+_UNORDERED_ITEM_RE = re.compile(r"^(?P<indent>[ \t]{0,3})[-+*]\s+")
 _AUTO_APPROVE_KEYS = {"risk_level", "user_authorization", "outcome", "rationale"}
 
 
-def _tighten_list_paragraphs(html: str) -> str:
-    return _LIST_PARA_RE.sub(r"<li\1>\2</li>", html)
+@dataclass(frozen=True, slots=True)
+class _FenceState:
+    fence: str
+    indent: str
+    header: str
+
+
+def _render_markdown(md: str) -> tuple[str, list[dict[str, Any]]]:
+    html = _MD_RENDERER.render(_normalize_nested_list_markers(md or ""))
+    rendered = transform_html(html)
+
+    text = _BULLET_RE.sub(r"\1-", rendered.text)
+    return text, _sanitize_entities(rendered.entities)
+
+
+def _normalize_nested_list_markers(md: str) -> str:
+    if not md:
+        return md
+
+    lines: list[str] = []
+    ordered_indent: str | None = None
+    fence_state: _FenceState | None = None
+
+    for raw_line in md.splitlines(keepends=True):
+        line, ending = _split_line_ending(raw_line)
+        fence_state = _update_fence_state(line, fence_state)
+        if fence_state is not None:
+            ordered_indent = None
+            lines.append(raw_line)
+            continue
+
+        if not line.strip():
+            ordered_indent = None
+            lines.append(raw_line)
+            continue
+
+        ordered_match = _ORDERED_ITEM_RE.match(line)
+        if ordered_match is not None:
+            ordered_indent = ordered_match.group("indent")
+            lines.append(raw_line)
+            continue
+
+        if ordered_indent is not None:
+            unordered_match = _UNORDERED_ITEM_RE.match(line)
+            if (
+                unordered_match is not None
+                and unordered_match.group("indent") == ordered_indent
+            ):
+                lines.append(f"{ordered_indent}   {line}{ending}")
+                continue
+
+            if line.startswith(ordered_indent) and len(line) > len(ordered_indent):
+                lines.append(raw_line)
+                continue
+
+            ordered_indent = None
+
+        lines.append(raw_line)
+
+    return "".join(lines)
+
+def _sanitize_entities(entities: list[Any]) -> list[dict[str, Any]]:
+    sanitized: list[dict[str, Any]] = []
+    for raw in entities:
+        entity = dict(raw)
+        if entity.get("type") == "text_link":
+            url = entity.get("url")
+            if not isinstance(url, str) or not _is_supported_text_link_url(url):
+                continue
+        sanitized.append(entity)
+    return sanitized
+
+
+def _is_supported_text_link_url(url: str) -> bool:
+    parsed = urlparse(url)
+    if parsed.scheme in {"http", "https"} and bool(parsed.netloc):
+        return True
+    return parsed.scheme == "tg" and (bool(parsed.netloc) or bool(parsed.path))
+
+
+def _split_line_ending(line: str) -> tuple[str, str]:
+    if line.endswith("\r\n"):
+        return line[:-2], "\r\n"
+    if line.endswith("\n"):
+        return line[:-1], "\n"
+    if line.endswith("\r"):
+        return line[:-1], "\r"
+    return line, ""
+
+
+def _update_fence_state(line: str, state: _FenceState | None) -> _FenceState | None:
+    match = _FENCE_RE.match(line)
+    if match is None:
+        return state
+
+    fence = match.group("fence")
+    if state is None:
+        return _FenceState(
+            fence=fence,
+            indent=match.group("indent"),
+            header=match.group("info"),
+        )
+
+    if (
+        line.startswith(state.indent)
+        and fence.startswith(state.fence[0])
+        and len(fence) >= len(state.fence)
+    ):
+        return None
+
+    return state
 
 
 def _json_object(value: object) -> dict[str, object] | None:
@@ -71,12 +185,7 @@ def main() -> None:
     if thread_id:
         md += f"\n\n`codex resume {thread_id}`"
 
-    html = _MD_RENDERER.render(md)
-    html = _tighten_list_paragraphs(html)
-    rendered = transform_html(html)
-
-    text = _BULLET_RE.sub(r"\1-", rendered.text)
-    entities = [dict(e) for e in rendered.entities]
+    text, entities = _render_markdown(md)
 
     r = requests.post(
         f"https://api.telegram.org/bot{bot_token}/sendMessage",
